@@ -6,28 +6,32 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}") 
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
     }
 }
 
-apply plugin: 'spring-boot' 
+apply plugin: 'spring-boot'
 
 jar {
     baseName = 'snakebot-app'
     version = '0.0.1-SNAPSHOT'
 }
 
+configurations {
+    compile.exclude module: "spring-boot-starter-tomcat"
+}
+
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-actuator')
-    compile('org.springframework.boot:spring-boot-starter-data-mongodb')
-    compile('org.springframework.boot:spring-boot-starter-data-rest')
+    compile project(':common')
+    compile project(':api')
+//    compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-starter-jersey')
-    compile('org.springframework.boot:spring-boot-starter-security')
+//    compile('org.springframework.boot:spring-boot-starter-security')
     compile('org.springframework.boot:spring-boot-starter-websocket')
-    testCompile('org.springframework.boot:spring-boot-starter-test') 
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-jetty')
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.9'
-}

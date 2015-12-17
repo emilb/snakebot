@@ -3,6 +3,8 @@ package se.cygni.game;
 import se.cygni.game.transformation.WorldTransformation;
 import se.cygni.game.worldobject.Empty;
 
+import java.util.List;
+
 /**
  * An immutable representation of the current world state.
  */
@@ -31,7 +33,7 @@ public class World {
         this.worldmatrix = worldmatrix;
     }
 
-    public World(World copy, WorldTransformation...transformations) {
+    public World(final World copy, List<WorldTransformation> transformations) {
         this.width = copy.width;
         this.height = copy.height;
 

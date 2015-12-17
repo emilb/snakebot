@@ -28,7 +28,7 @@ public class AddRandomFoodTest {
             }
         }
 
-        assertEquals(2, foodCount);
+        assertEquals(1, foodCount);
     }
 
 
