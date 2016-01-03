@@ -1,7 +1,12 @@
 package se.cygni.game.worldobject;
 
-/**
- * Created by emil on 16/12/15.
- */
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Obstacle implements WorldObject {
+
+    @Override
+    public String toString() {
+        return "Obstacle{}";
+    }
 }
