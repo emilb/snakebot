@@ -4,5 +4,5 @@ import se.cygni.game.World;
 
 public interface WorldTransformation {
 
-    public World transform(World currentWorld);
+    World transform(World currentWorld);
 }

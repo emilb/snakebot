@@ -1,19 +1,25 @@
 package se.cygni.game;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import se.cygni.game.transformation.WorldTransformation;
 import se.cygni.game.worldobject.Empty;
+import se.cygni.game.worldobject.Obstacle;
+import se.cygni.game.worldobject.SnakeHead;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * An immutable representation of the current world state.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class World {
 
     // The width and height (in Tiles) of the game world
     private final int width, height;
 
     private final Tile[][] worldmatrix;
+
+    private Map<String, SnakeHead> players;
 
     public World(int width, int height) {
         this.width = width;
@@ -42,7 +48,6 @@ public class World {
         for (WorldTransformation t: transformations) {
             resultingWorld = t.transform(resultingWorld);
         }
-
         this.worldmatrix = resultingWorld.getWorldmatrix();
     }
 
@@ -59,17 +64,34 @@ public class World {
     }
 
     public boolean isTileEmpty(int width, int height) {
-        if (width >= this.width || height >= this.height)
-            return false;
+        return !(width >= this.width || height >= this.height) && worldmatrix[width][height].getContent() instanceof Empty;
+    }
 
-        return worldmatrix[width][height].getContent() instanceof Empty;
+
+    public boolean hasObstacle(Position position) {
+        return this.getTile(position.getX(), position.getY()).getContent() instanceof Obstacle;
     }
 
     public Tile getTile(int x, int y) {
         if (x > this.width || y > this.height) {
             throw new RuntimeException("Out of bounds on world matrix");
         }
-
         return worldmatrix[x][y];
+    }
+
+    @Override
+    public String toString() {
+        return "World{" +
+                "width=" + width +
+                ", height=" + height +
+                ", worldmatrix=" + Arrays.toString(worldmatrix) +
+                '}';
+    }
+
+    public Map<String, SnakeHead> getPlayers() {
+        if(players == null){
+            players = new HashMap<>();
+        }
+        return players;
     }
 }
