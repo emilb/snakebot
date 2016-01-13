@@ -1,4 +1,4 @@
-package se.cygni.snake.suscriber;
+package se.cygni.snake.subscriber;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

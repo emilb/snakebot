@@ -10,7 +10,7 @@
 //import se.cygni.game.Tile;
 //import se.cygni.game.World;
 //import se.cygni.snake.controller.GameController;
-//import se.cygni.snake.suscriber.NewGameSubscriber;
+//import se.cygni.snake.subscriber.NewGameSubscriber;
 //
 //import static org.mockito.Mockito.*;
 //import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

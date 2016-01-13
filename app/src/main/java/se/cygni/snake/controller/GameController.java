@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import se.cygni.game.World;
 import se.cygni.game.enums.Direction;
-import se.cygni.snake.suscriber.NewGameSubscriber;
+import se.cygni.snake.subscriber.NewGameSubscriber;
 
 @RestController
 public class GameController {
