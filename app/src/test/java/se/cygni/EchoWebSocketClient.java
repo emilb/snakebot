@@ -10,9 +10,6 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by emil on 12/01/16.
- */
 public class EchoWebSocketClient {
     public static void main(String[] args) {
         List<Transport> transports = new ArrayList<>(2);

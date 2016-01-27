@@ -1,8 +1,5 @@
 package se.cygni.snake.api;
 
-/**
- * Created by emil on 12/01/16.
- */
 public class GameMessage {
 
     private String playerId;

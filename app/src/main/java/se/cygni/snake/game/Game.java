@@ -4,19 +4,25 @@ package se.cygni.snake.game;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import se.cygni.game.Player;
-import se.cygni.snake.api.exception.PlayerNameTaken;
+import se.cygni.snake.api.exception.InvalidPlayerName;
+import se.cygni.snake.api.request.RegisterMove;
 import se.cygni.snake.api.request.RegisterPlayer;
 import se.cygni.snake.api.response.PlayerRegistered;
 import se.cygni.snake.api.util.MessageUtils;
+import se.cygni.snake.player.IPlayer;
+import se.cygni.snake.player.RemotePlayer;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class Game {
 
     private final EventBus incomingEventBus;
     private final EventBus outgoingEventBus;
     private final String gameId;
-    private Set<Player> players = Collections.synchronizedSet(new HashSet<>());
+    private Set<IPlayer> players = Collections.synchronizedSet(new HashSet<>());
 
     public Game() {
         gameId = UUID.randomUUID().toString();
@@ -29,14 +35,16 @@ public class Game {
     @Subscribe
     public void registerPlayer(RegisterPlayer registerPlayer) {
         Player player = new Player(registerPlayer.getPlayerName(), registerPlayer.getColor());
+        player.setPlayerId(registerPlayer.getPlayerId());
 
         if (players.contains(player)) {
-            PlayerNameTaken playerNameTaken = new PlayerNameTaken(PlayerNameTaken.PlayerNameInvalidReason.Taken);
+            InvalidPlayerName playerNameTaken = new InvalidPlayerName(InvalidPlayerName.PlayerNameInvalidReason.Taken);
             MessageUtils.copyCommonAttributes(registerPlayer, playerNameTaken);
             outgoingEventBus.post(playerNameTaken);
         }
 
-        addPlayer(player);
+        RemotePlayer remotePlayer = new RemotePlayer(player, this, outgoingEventBus);
+        addPlayer(remotePlayer);
 
         PlayerRegistered playerRegistered = MessageUtils.copyCommonAttributes(registerPlayer, new PlayerRegistered());
         playerRegistered.setGameId(gameId);
@@ -45,7 +53,12 @@ public class Game {
 
     }
 
-    public void addPlayer(Player player) {
+    @Subscribe
+    public void registerMove(RegisterMove registerMove) {
+
+    }
+
+    public void addPlayer(IPlayer player) {
         players.add(player);
     }
 
@@ -55,5 +68,9 @@ public class Game {
 
     public EventBus getIncomingEventBus() {
         return incomingEventBus;
+    }
+
+    public String getGameId() {
+        return gameId;
     }
 }

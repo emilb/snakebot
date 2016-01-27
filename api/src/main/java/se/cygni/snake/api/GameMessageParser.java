@@ -1,10 +1,10 @@
 package se.cygni.snake.api;
 
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +17,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
+@SuppressWarnings("unchecked")
 public class GameMessageParser {
     private static Logger log = LoggerFactory.getLogger(GameMessageParser.class);
-
-    private static String currentVersion = null;
 
     private static ObjectMapper mapper = new ObjectMapper();
 
@@ -39,7 +37,6 @@ public class GameMessageParser {
 
         for (final BeanDefinition bd : scanner
                 .findCandidateComponents("se.cygni.snake.api")) {
-            log.info("Found message type class: " + bd.getBeanClassName());
             try {
                 typeToClass.put(bd.getBeanClassName(),
                         (Class<? extends GameMessage>) Class.forName(bd
@@ -48,6 +45,8 @@ public class GameMessageParser {
                 log.warn("Error in caching class in Type to Class map", e);
             }
         }
+
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
 
     private GameMessageParser() {
@@ -56,11 +55,9 @@ public class GameMessageParser {
     public static GameMessage decodeMessage(final String msg)
             throws IOException {
         try {
-            final GameMessage message = mapper
+            return mapper
                     .readValue(msg,
                             GameMessageParser.parseAndGetClassForMessage(msg));
-
-            return message;
         } catch (final IllegalStateException e) {
             log.error(msg);
             throw e;
@@ -80,7 +77,7 @@ public class GameMessageParser {
 
         JsonParser parser = null;
         try {
-            parser = factory.createJsonParser(message);
+            parser = factory.createParser(message);
             final JsonNode node = mapper.readTree(parser);
             final JsonNode typeNode = node.path(TYPE_IDENTIFIER);
 
@@ -104,6 +101,7 @@ public class GameMessageParser {
                 try {
                     parser.close();
                 } catch (final IOException e) {
+                    log.info("Failed to close json parser");
                 }
             }
         }

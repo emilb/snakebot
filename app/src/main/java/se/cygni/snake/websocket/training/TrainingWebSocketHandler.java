@@ -27,7 +27,7 @@ public class TrainingWebSocketHandler extends TextWebSocketHandler {
     private GameManager gameManager;
 
     private WebSocketSession webSocketSession;
-    private final EventBus eventBus;
+    private final EventBus outgoingEventBus;
     private final EventBus incomingEventBus;
     private final Game game;
     private final String playerId;
@@ -39,8 +39,8 @@ public class TrainingWebSocketHandler extends TextWebSocketHandler {
         game = gameManager.createTrainingGame();
 
         // Get an eventbus and register this handler
-        eventBus = game.getOutgoingEventBus();
-        eventBus.register(this);
+        outgoingEventBus = game.getOutgoingEventBus();
+        outgoingEventBus.register(this);
 
         incomingEventBus = game.getIncomingEventBus();
     }
@@ -74,7 +74,7 @@ public class TrainingWebSocketHandler extends TextWebSocketHandler {
     public void handleTransportError(WebSocketSession session, Throwable exception)
             throws Exception {
         session.close(CloseStatus.SERVER_ERROR);
-        eventBus.unregister(this);
+        outgoingEventBus.unregister(this);
     }
 
     @Subscribe
