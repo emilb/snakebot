@@ -11,8 +11,12 @@
   "dependencies": {
     "axios": "^0.8.1",
     "firebase": "^2.3.2",
+    "history": "^1.17.0",
+    "lodash": "^3.10.1",
     "re-base": "^1.5.0",
     "react": "^0.14.5",
+    "react-dom": "^0.14.6",
+    "react-router": "^1.0.3",
     "reactfire": "^0.5.1"
   },
   "devDependencies": {
