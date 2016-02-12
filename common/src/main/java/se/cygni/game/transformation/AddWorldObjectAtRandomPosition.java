@@ -30,7 +30,7 @@ public class AddWorldObjectAtRandomPosition implements WorldTransformation {
             return currentWorld;
         }
 
-        int[] illegalPositions = currentWorld.listIllegalPositions();
+        int[] illegalPositions = currentWorld.listPositionsAdjacentToSnakeHeads();
 
         int[] validPositions = ArrayUtils.removeElements(emptyPositions, illegalPositions);
         if (validPositions.length == 0) {

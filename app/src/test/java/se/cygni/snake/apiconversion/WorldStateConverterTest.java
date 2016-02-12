@@ -1,5 +1,6 @@
 package se.cygni.snake.apiconversion;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import se.cygni.game.WorldState;
 import se.cygni.game.testutil.SnakeTestUtil;
@@ -202,5 +203,19 @@ public class WorldStateConverterTest {
             return MapEmpty.class;
 
         throw new IllegalArgumentException(obj.getClass() + " is not a known type");
+    }
+
+    @Test @Ignore
+    public void testStreams() throws Exception {
+        int [] result = IntStream.concat(
+                IntStream.range(0, 10),
+                IntStream.range(0, 10).flatMap(x -> IntStream.of(generate(x))))
+                .toArray();
+
+        assertEquals(40, result.length);
+    }
+
+    private int[] generate(int x) {
+        return new int[] {66,66,66};
     }
 }

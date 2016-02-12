@@ -5,6 +5,7 @@ import se.cygni.game.enums.Direction;
 import se.cygni.game.worldobject.*;
 
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class WorldState {
 
@@ -51,9 +52,9 @@ public class WorldState {
         return width * height;
     }
 
-    public Tile getTile(Coordinate coordinate) {
-        return getTile(translateCoordinate(coordinate));
-    }
+//    public Tile getTile(Coordinate coordinate) {
+//        return getTile(translateCoordinate(coordinate));
+//    }
 
     public Tile getTile(int position) {
         if (position < 0 || position > getSize())
@@ -78,45 +79,17 @@ public class WorldState {
         return getTile(position).getContent().getClass() == clazz;
     }
 
-    public Coordinate getPositionForAdjacent(Coordinate coordinate, Direction direction) {
-        return translatePosition(
-                getPositionForAdjacent(
-                        translateCoordinate(coordinate), direction));
-    }
-
     public int getPositionForAdjacent(int position, Direction direction) {
-        int size = getSize();
-
-        int newPosition;
-
-        switch (direction) {
-            case DOWN:  newPosition = position + width; break;
-            case UP:    newPosition = position - width; break;
-            case RIGHT: newPosition = position + 1; break;
-            case LEFT:  newPosition = position - 1; break;
-            default:    newPosition = -1; break;
-        }
-
-        // Out of hard bounds (top of bottom)
-        if (newPosition < 0 || newPosition >= size)
+        if (!hasAdjacentTile(position, direction))
             throw new RuntimeException("Out of bounds on world matrix");
 
-        // Hit a wall (left or right)
         switch (direction) {
-            case DOWN:  break;
-            case UP:    break;
-            case RIGHT:
-                if (newPosition % width == 0)
-                    throw new RuntimeException("Out of bounds on world matrix");
-                break;
-            case LEFT:
-                if (position % width == 0)
-                    throw new RuntimeException("Out of bounds on world matrix");
-                break;
-            default:    break;
+            case DOWN:  return position + width;
+            case UP:    return position - width;
+            case RIGHT: return position + 1;
+            case LEFT:  return position - 1;
+            default:    throw new RuntimeException("Invalid direction");
         }
-
-        return newPosition;
     }
 
     /**
@@ -127,19 +100,41 @@ public class WorldState {
      *
      * @return
      */
-    public int[] listIllegalPositions() {
+    public int[] listPositionsAdjacentToSnakeHeads() {
         int[] snakeHeadPositions = listPositionsWithContentOf(SnakeHead.class);
 
-        int[] ipos = new int[snakeHeadPositions.length*4];
-        int c = 0;
-        for (int pos : snakeHeadPositions) {
-            ipos[c++] = getPositionForAdjacent(pos, Direction.DOWN);
-            ipos[c++] = getPositionForAdjacent(pos, Direction.UP);
-            ipos[c++] = getPositionForAdjacent(pos, Direction.RIGHT);
-            ipos[c++] = getPositionForAdjacent(pos, Direction.LEFT);
-        }
+        return IntStream.of(snakeHeadPositions).flatMap(pos ->
+            IntStream.of(
+                    listAdjacentTiles(pos)
+            )
+        ).toArray();
+    }
 
-        return ipos;
+    public int[] listAdjacentTiles(int position) {
+        return Stream.of(Direction.values())
+                .mapToInt(direction -> {
+                    if (hasAdjacentTile(position, direction))
+                        return getPositionForAdjacent(position, direction);
+                    return -1;
+                })
+                .filter(p -> p >= 0)
+                .toArray();
+    }
+
+    /**
+     *
+     * @param position
+     * @param direction
+     * @return True if the adjacent is within bounds (i.e. not a wall)
+     */
+    public boolean hasAdjacentTile(int position, Direction direction) {
+        switch (direction) {
+            case UP   : return (position-width >= 0);
+            case DOWN : return (position+width < getSize());
+            case LEFT : return (position % width != 0);
+            case RIGHT: return ((position+1) % width != 0);
+            default   : return false;
+        }
     }
 
     public int[] listPositionsWithContentOf(Class clazz) {
@@ -159,6 +154,14 @@ public class WorldState {
         return listPositionsWithContentOf(Obstacle.class);
     }
 
+    public int[] listEmptyValidPositions() {
+        int[] emptyPositions = listEmptyPositions();
+        int[] snakeAdjacentPositions = listPositionsAdjacentToSnakeHeads();
+
+        return IntStream.of(emptyPositions).filter(pos ->
+            !ArrayUtils.contains(snakeAdjacentPositions, pos)
+        ).toArray();
+    }
     /**
      * @return a copy of the tiles
      */

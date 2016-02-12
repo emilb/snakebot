@@ -6,10 +6,16 @@ import se.cygni.game.enums.Direction;
 import se.cygni.game.testutil.SnakeTestUtil;
 import se.cygni.game.worldobject.Food;
 import se.cygni.game.worldobject.Obstacle;
+import se.cygni.game.worldobject.SnakeHead;
 
 import java.util.stream.IntStream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.junit.Assert.*;
+
+//import static org.junit.Assert.*;
+
 
 public class WorldStateTest {
 
@@ -31,7 +37,6 @@ public class WorldStateTest {
         ws = new WorldState(10, 10, tiles);
 
         assertEquals(food, ws.getTile(12).getContent());
-        assertEquals(food, ws.getTile(new Coordinate(2,1)).getContent());
     }
 
     @Test
@@ -201,6 +206,27 @@ public class WorldStateTest {
     }
 
     @Test
+    public void testListEmptyValidPositions() throws Exception {
+        int[] foodPositions = new int[] { 2, 6, 90 };
+        WorldState ws = SnakeTestUtil.createWorld(Food.class, 10, 10, foodPositions);
+
+        SnakeHead h1 = new SnakeHead("h1", "p1", 16);
+        SnakeHead h2 = new SnakeHead("h2", "p2", 84);
+
+        ws = SnakeTestUtil.replaceWorldObjectAt(ws, h1, 16);
+        ws = SnakeTestUtil.replaceWorldObjectAt(ws, h2, 84);
+
+        int[] adjacentAndSnakeHead = new int[] {16, 84, 6,26,15,17,74,94,83,85};
+
+        int[] validPositions = IntStream.range(0, 100).filter( pos->
+                (!ArrayUtils.contains(foodPositions, pos) &&
+                !ArrayUtils.contains(adjacentAndSnakeHead, pos))
+        ).toArray();
+
+        assertArrayEquals(validPositions, ws.listEmptyValidPositions());
+    }
+
+    @Test
     public void testListFoodPositions() throws Exception {
 
         int[] foodPositions = new int[] { 2, 6, 85 };
@@ -216,5 +242,181 @@ public class WorldStateTest {
         WorldState ws = SnakeTestUtil.createWorld(Obstacle.class, 10, 10, obstaclePositions);
 
         assertArrayEquals(obstaclePositions, ws.listObstaclePositions());
+    }
+
+    @Test
+    public void testListPositionsAdjacentToSnakeHeads() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+
+        SnakeHead h1 = new SnakeHead("h1", "p1", 16);
+        SnakeHead h2 = new SnakeHead("h2", "p2", 84);
+
+        ws = SnakeTestUtil.replaceWorldObjectAt(ws, h1, 16);
+        ws = SnakeTestUtil.replaceWorldObjectAt(ws, h2, 84);
+
+        int[] illegalPos = ws.listPositionsAdjacentToSnakeHeads();
+
+        assertEquals(8, illegalPos.length);
+        assertThat(
+                ArrayUtils.toObject(illegalPos),
+                arrayContainingInAnyOrder(1,31,15,17,69,99,83,85));
+    }
+
+    @Test
+    public void testListPositionsAdjacentToSnakeHeadsNearEdge() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+
+        SnakeHead h1 = new SnakeHead("h1", "p1", 45);
+        SnakeHead h2 = new SnakeHead("h2", "p2", 84);
+
+        ws = SnakeTestUtil.replaceWorldObjectAt(ws, h1, 45);
+        ws = SnakeTestUtil.replaceWorldObjectAt(ws, h2, 84);
+
+        int[] illegalPos = ws.listPositionsAdjacentToSnakeHeads();
+
+        assertEquals(7, illegalPos.length);
+        assertThat(
+                ArrayUtils.toObject(illegalPos),
+                arrayContainingInAnyOrder(30,46,60,69,99,83,85));
+    }
+
+    @Test
+    public void testHasAdjacentTileLeft() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        Direction direction = Direction.LEFT;
+        assertFalse(ws.hasAdjacentTile(0,   direction));
+        assertFalse(ws.hasAdjacentTile(150, direction));
+        assertTrue(ws.hasAdjacentTile(151,  direction));
+        assertTrue(ws.hasAdjacentTile(89,   direction));
+        assertTrue(ws.hasAdjacentTile(224,  direction));
+    }
+
+    @Test
+    public void testHasAdjacentTileRight() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        Direction direction = Direction.RIGHT;
+        assertFalse(ws.hasAdjacentTile(224,   direction));
+        assertFalse(ws.hasAdjacentTile(59, direction));
+        assertTrue(ws.hasAdjacentTile(82,  direction));
+        assertTrue(ws.hasAdjacentTile(0,   direction));
+        assertTrue(ws.hasAdjacentTile(105,  direction));
+    }
+
+    @Test
+    public void testHasAdjacentTileUp() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        Direction direction = Direction.UP;
+        assertFalse(ws.hasAdjacentTile(0,   direction));
+        assertFalse(ws.hasAdjacentTile(12, direction));
+        assertFalse(ws.hasAdjacentTile(14, direction));
+        assertTrue(ws.hasAdjacentTile(15,  direction));
+        assertTrue(ws.hasAdjacentTile(82,  direction));
+        assertTrue(ws.hasAdjacentTile(195,   direction));
+        assertTrue(ws.hasAdjacentTile(224,  direction));
+    }
+
+    @Test
+    public void testHasAdjacentTileDown() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        Direction direction = Direction.DOWN;
+        assertFalse(ws.hasAdjacentTile(210,   direction));
+        assertFalse(ws.hasAdjacentTile(216, direction));
+        assertFalse(ws.hasAdjacentTile(224, direction));
+        assertTrue(ws.hasAdjacentTile(3,  direction));
+        assertTrue(ws.hasAdjacentTile(97,   direction));
+        assertTrue(ws.hasAdjacentTile(150,  direction));
+    }
+
+    @Test
+    public void testListAdjacentTilesMiddle() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        int[] adjacent = ws.listAdjacentTiles(112);
+
+        assertEquals(4, adjacent.length);
+        assertThat(ArrayUtils.toObject(adjacent), arrayContainingInAnyOrder(111,113,97,127));
+    }
+
+    @Test
+    public void testListAdjacentTilesLeftWall() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        int[] adjacent = ws.listAdjacentTiles(135);
+
+        assertEquals(3, adjacent.length);
+        assertThat(ArrayUtils.toObject(adjacent), arrayContainingInAnyOrder(120,136,150));
+    }
+
+    @Test
+    public void testListAdjacentTilesRightWall() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        int[] adjacent = ws.listAdjacentTiles(59);
+
+        assertEquals(3, adjacent.length);
+        assertThat(ArrayUtils.toObject(adjacent), arrayContainingInAnyOrder(44,58,74));
+    }
+
+    @Test
+    public void testListAdjacentTilesTopWall() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        int[] adjacent = ws.listAdjacentTiles(10);
+
+        assertEquals(3, adjacent.length);
+        assertThat(ArrayUtils.toObject(adjacent), arrayContainingInAnyOrder(25,9,11));
+    }
+
+    @Test
+    public void testListAdjacentTilesBottomWall() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        int[] adjacent = ws.listAdjacentTiles(217);
+
+        assertEquals(3, adjacent.length);
+        assertThat(ArrayUtils.toObject(adjacent), arrayContainingInAnyOrder(202,216,218));
+    }
+
+    @Test
+    public void testListAdjacentTilesTopLeftCorner() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        int[] adjacent = ws.listAdjacentTiles(0);
+
+        assertEquals(2, adjacent.length);
+        assertThat(ArrayUtils.toObject(adjacent), arrayContainingInAnyOrder(1,15));
+    }
+
+    @Test
+    public void testListAdjacentTilesTopRightCorner() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        int[] adjacent = ws.listAdjacentTiles(14);
+
+        assertEquals(2, adjacent.length);
+        assertThat(ArrayUtils.toObject(adjacent), arrayContainingInAnyOrder(13,29));
+    }
+
+    @Test
+    public void testListAdjacentTilesBottomLeftCorner() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        int[] adjacent = ws.listAdjacentTiles(210);
+
+        assertEquals(2, adjacent.length);
+        assertThat(ArrayUtils.toObject(adjacent), arrayContainingInAnyOrder(195,211));
+    }
+
+    @Test
+    public void testListAdjacentTilesBottomRightCorner() throws Exception {
+        WorldState ws = new WorldState(15, 15);
+        int[] adjacent = ws.listAdjacentTiles(224);
+
+        assertEquals(2, adjacent.length);
+        assertThat(ArrayUtils.toObject(adjacent), arrayContainingInAnyOrder(209,223));
+    }
+
+    @Test
+    public void testPrintCoordinatePosition() {
+        int size = 10;
+        int counter = 0;
+        for (int x=0; x<size; x++) {
+            for (int y=0; y<size; y++) {
+                System.out.printf("%03d ", counter++);
+            }
+            System.out.println("\n");
+        }
     }
 }
