@@ -11,7 +11,7 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${jetty.logs}/poker.log</file>
+        <file>${jetty.logs}/snake.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
             <fileNamePattern>snake.%d{yyyy-MM-dd}.log</fileNamePattern>
@@ -27,7 +27,7 @@
 
     <logger name="se" level="INFO"/>
     <root level="WARN">
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="STDOUT"/>
     </root>
 
 </configuration>

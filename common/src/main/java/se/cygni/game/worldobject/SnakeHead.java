@@ -6,13 +6,15 @@ import se.cygni.game.enums.Direction;
 public class SnakeHead implements SnakePart {
 
     private final String name;
+    private final String playerId;
     private int position;
     private boolean alive;
     private Direction lastDirection;
     private SnakePart nextSnakePart = null;
 
-    public SnakeHead(String name, int position) {
+    public SnakeHead(String name, String playerId, int position) {
         this.name = name;
+        this.playerId = playerId;
         this.position = position;
         this.alive = true;
     }
@@ -60,19 +62,7 @@ public class SnakeHead implements SnakePart {
         return length;
     }
 
-    public boolean isAlive() {
-        return alive;
-    }
-
-    public void setAlive(boolean alive) {
-        this.alive = alive;
-    }
-
-    public Direction getLastDirection() {
-        return lastDirection;
-    }
-
-    public void setLastDirection(Direction lastDirection) {
-        this.lastDirection = lastDirection;
+    public String getPlayerId() {
+        return playerId;
     }
 }

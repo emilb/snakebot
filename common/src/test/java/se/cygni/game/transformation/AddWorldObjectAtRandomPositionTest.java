@@ -12,14 +12,14 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 
-public class AddRandomWorldObjectTest {
+public class AddWorldObjectAtRandomPositionTest {
 
     @Test
     public void testAddRandomWorldObjectTransform() throws Exception {
         WorldState world = new WorldState(3,3);
 
         Food food = new Food();
-        AddRandomWorldObject randomFood = new AddRandomWorldObject(food);
+        AddWorldObjectAtRandomPosition randomFood = new AddWorldObjectAtRandomPosition(food);
         WorldState transformedWorld = randomFood.transform(world);
 
         int noofTilesNotEmpty = 0;
@@ -44,11 +44,11 @@ public class AddRandomWorldObjectTest {
         WorldState world = new WorldState(3,3);
 
         Obstacle obstacle = new Obstacle();
-        AddRandomWorldObject randomObstacle = new AddRandomWorldObject(obstacle);
+        AddWorldObjectAtRandomPosition randomObstacle = new AddWorldObjectAtRandomPosition(obstacle);
         WorldState transformedWorld = randomObstacle.transform(world);
 
         Food food = new Food();
-        AddRandomWorldObject randomFood = new AddRandomWorldObject(food);
+        AddWorldObjectAtRandomPosition randomFood = new AddWorldObjectAtRandomPosition(food);
         transformedWorld = randomFood.transform(transformedWorld);
 
         int noofTilesNotEmpty = 0;
@@ -81,7 +81,7 @@ public class AddRandomWorldObjectTest {
         WorldState ws = SnakeTestUtil.createWorld(Obstacle.class, 10, 10, IntStream.range(0,100).toArray());
 
         Food food = new Food();
-        AddRandomWorldObject randomFood = new AddRandomWorldObject(food);
+        AddWorldObjectAtRandomPosition randomFood = new AddWorldObjectAtRandomPosition(food);
 
         ws = randomFood.transform(ws);
 
@@ -96,7 +96,7 @@ public class AddRandomWorldObjectTest {
         ws = SnakeTestUtil.replaceWorldObjectAt(ws, new Empty(), 50);
 
         Food food = new Food();
-        AddRandomWorldObject randomFood = new AddRandomWorldObject(food);
+        AddWorldObjectAtRandomPosition randomFood = new AddWorldObjectAtRandomPosition(food);
 
         ws = randomFood.transform(ws);
 

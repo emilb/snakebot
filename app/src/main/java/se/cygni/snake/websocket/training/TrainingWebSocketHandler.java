@@ -62,11 +62,11 @@ public class TrainingWebSocketHandler extends TextWebSocketHandler {
         GameMessage gameMessage = GameMessageParser.decodeMessage(message.getPayload());
 
         // Add playerId if missing
-        if (StringUtils.isEmpty(gameMessage.getPlayerId())) {
-            gameMessage.setPlayerId(playerId);
+        if (StringUtils.isEmpty(gameMessage.getRecievingPlayerId())) {
+            gameMessage.setRecievingPlayerId(playerId);
         }
 
-        // Send to gamemanager
+        // Send to game
         incomingEventBus.post(gameMessage);
     }
 
@@ -75,13 +75,14 @@ public class TrainingWebSocketHandler extends TextWebSocketHandler {
             throws Exception {
         session.close(CloseStatus.SERVER_ERROR);
         outgoingEventBus.unregister(this);
+        game.playerLostConnection(playerId);
     }
 
     @Subscribe
     public void sendSnakeMessage(GameMessage message) throws IOException {
 
         // Verify that this message is intended to this player (or null if for all players)
-        if (!StringUtils.isEmpty(message.getPlayerId()) && !playerId.equals(message.getPlayerId())) {
+        if (!StringUtils.isEmpty(message.getRecievingPlayerId()) && !playerId.equals(message.getRecievingPlayerId())) {
             return;
         }
 

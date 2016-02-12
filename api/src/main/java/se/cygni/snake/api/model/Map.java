@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 @GameMessageType
 public class Map extends GameMessage {
     final int width, height;
-
+    final long worldTick;
     final TileContent[][] tiles;
     final SnakeInfo[] snakeInfos;
 
@@ -23,12 +23,14 @@ public class Map extends GameMessage {
     public Map(
             @JsonProperty("width") int width,
             @JsonProperty("height") int height,
+            @JsonProperty("worldTick") long worldTick,
             @JsonProperty("tiles") TileContent[][] tiles,
             @JsonProperty("snakeInfos") SnakeInfo[] snakeInfos
     )
     {
         this.width = width;
         this.height = height;
+        this.worldTick = worldTick;
         this.tiles = tiles;
         this.snakeInfos = snakeInfos;
     }
@@ -49,10 +51,13 @@ public class Map extends GameMessage {
         return snakeInfos;
     }
 
+    public long getWorldTick() {
+        return worldTick;
+    }
+
     /**
      * Returns a printable textual representation of
      * the map.
-     *
      */
     @JsonIgnore
     public String toString() {

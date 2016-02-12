@@ -17,7 +17,7 @@ public class RemoveRandomWorldObjectTest {
         WorldState ws = SnakeTestUtil.createWorld(Obstacle.class, 10, 10, 9, 12, 18);
         ws = SnakeTestUtil.replaceWorldObjectAt(ws, new Food(), 10);
 
-        RemoveRandomWorldObject removeTransformation = new RemoveRandomWorldObject(Obstacle.class);
+        RemoveRandomWorldObject<Obstacle> removeTransformation = new RemoveRandomWorldObject<Obstacle>(Obstacle.class);
 
         ws = removeTransformation.transform(ws);
 
@@ -30,7 +30,7 @@ public class RemoveRandomWorldObjectTest {
 
         WorldState ws = SnakeTestUtil.createWorld(Obstacle.class, 10, 10, 9, 12, 18);
 
-        RemoveRandomWorldObject removeTransformation = new RemoveRandomWorldObject(Food.class);
+        RemoveRandomWorldObject<Food> removeTransformation = new RemoveRandomWorldObject<Food>(Food.class);
 
         ws = removeTransformation.transform(ws);
 

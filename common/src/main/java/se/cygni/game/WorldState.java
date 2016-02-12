@@ -2,10 +2,7 @@ package se.cygni.game;
 
 import org.apache.commons.lang3.ArrayUtils;
 import se.cygni.game.enums.Direction;
-import se.cygni.game.worldobject.Empty;
-import se.cygni.game.worldobject.Food;
-import se.cygni.game.worldobject.Obstacle;
-import se.cygni.game.worldobject.WorldObject;
+import se.cygni.game.worldobject.*;
 
 import java.util.stream.IntStream;
 
@@ -120,6 +117,29 @@ public class WorldState {
         }
 
         return newPosition;
+    }
+
+    /**
+     * Positions that are adjacent to a SnakeHead are
+     * considered illegal. This is because no action
+     * on these tiles should be taken since it could
+     * cause a snake to collide.
+     *
+     * @return
+     */
+    public int[] listIllegalPositions() {
+        int[] snakeHeadPositions = listPositionsWithContentOf(SnakeHead.class);
+
+        int[] ipos = new int[snakeHeadPositions.length*4];
+        int c = 0;
+        for (int pos : snakeHeadPositions) {
+            ipos[c++] = getPositionForAdjacent(pos, Direction.DOWN);
+            ipos[c++] = getPositionForAdjacent(pos, Direction.UP);
+            ipos[c++] = getPositionForAdjacent(pos, Direction.RIGHT);
+            ipos[c++] = getPositionForAdjacent(pos, Direction.LEFT);
+        }
+
+        return ipos;
     }
 
     public int[] listPositionsWithContentOf(Class clazz) {

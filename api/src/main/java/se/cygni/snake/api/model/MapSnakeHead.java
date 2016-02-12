@@ -9,15 +9,15 @@ public class MapSnakeHead implements TileContent {
     public static final String CONTENT = "snakehead";
 
     final String name;
-    final int id;
+    final String playerId;
 
     @JsonCreator
     public MapSnakeHead(
             @JsonProperty("name") String name,
-            @JsonProperty("id") int id)
+            @JsonProperty("playerId") String playerId)
     {
         this.name = name;
-        this.id = id;
+        this.playerId = playerId;
     }
 
     @Override
@@ -29,8 +29,8 @@ public class MapSnakeHead implements TileContent {
         return name;
     }
 
-    public int getId() {
-        return id;
+    public String getPlayerId() {
+        return playerId;
     }
 
     @JsonIgnore

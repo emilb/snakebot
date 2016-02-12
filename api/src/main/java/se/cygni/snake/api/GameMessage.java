@@ -2,7 +2,7 @@ package se.cygni.snake.api;
 
 public class GameMessage {
 
-    private String playerId;
+    private String recievingPlayerId;
     private String messageId;
     private String correlationId;
     private final String type = this.getClass().getCanonicalName();
@@ -27,11 +27,11 @@ public class GameMessage {
         return type;
     }
 
-    public String getPlayerId() {
-        return playerId;
+    public String getRecievingPlayerId() {
+        return recievingPlayerId;
     }
 
-    public void setPlayerId(String playerId) {
-        this.playerId = playerId;
+    public void setRecievingPlayerId(String recievingPlayerId) {
+        this.recievingPlayerId = recievingPlayerId;
     }
 }

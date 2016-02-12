@@ -24,13 +24,12 @@ public class MoveSnakeTest {
         int startPos = 15;
         int expectedEndPos = 16;
 
-        SnakeHead head = new SnakeHead("test", startPos);
+        SnakeHead head = new SnakeHead("test", "id", startPos);
         ws = SnakeTestUtil.replaceWorldObjectAt(ws, head, startPos);
         MoveSnake moveSnake = new MoveSnake(head, Direction.RIGHT);
         ws = moveSnake.transform(ws);
 
         assertEquals(expectedEndPos, head.getPosition());
-        assertEquals(Direction.RIGHT, head.getLastDirection());
         assertArrayEquals(new int[] { expectedEndPos }, ws.listPositionsWithContentOf(SnakeHead.class));
     }
 
@@ -41,7 +40,7 @@ public class MoveSnakeTest {
         int startPos = 15;
         int expectedEndPos = 14;
 
-        SnakeHead head = new SnakeHead("test", startPos);
+        SnakeHead head = new SnakeHead("test", "id", startPos);
         ws = SnakeTestUtil.replaceWorldObjectAt(ws, head, startPos);
         MoveSnake moveSnake = new MoveSnake(head, Direction.LEFT);
         ws = moveSnake.transform(ws);
@@ -57,7 +56,7 @@ public class MoveSnakeTest {
         int startPos = 15;
         int expectedEndPos = 5;
 
-        SnakeHead head = new SnakeHead("test", startPos);
+        SnakeHead head = new SnakeHead("test", "id", startPos);
         ws = SnakeTestUtil.replaceWorldObjectAt(ws, head, startPos);
         MoveSnake moveSnake = new MoveSnake(head, Direction.UP);
         ws = moveSnake.transform(ws);
@@ -73,7 +72,7 @@ public class MoveSnakeTest {
         int startPos = 15;
         int expectedEndPos = 25;
 
-        SnakeHead head = new SnakeHead("test", startPos);
+        SnakeHead head = new SnakeHead("test", "id", startPos);
         ws = SnakeTestUtil.replaceWorldObjectAt(ws, head, startPos);
         MoveSnake moveSnake = new MoveSnake(head, Direction.DOWN);
         ws = moveSnake.transform(ws);
@@ -89,7 +88,7 @@ public class MoveSnakeTest {
         int startPos = 15;
         int expectedEndPos = 16;
 
-        SnakeHead head = new SnakeHead("test", startPos);
+        SnakeHead head = new SnakeHead("test", "id", startPos);
         SnakeBody body = new SnakeBody(25);
         head.setNextSnakePart(body);
 
@@ -112,7 +111,7 @@ public class MoveSnakeTest {
 
         int startPos = 95;
 
-        SnakeHead head = new SnakeHead("test", startPos);
+        SnakeHead head = new SnakeHead("test", "id", startPos);
         ws = SnakeTestUtil.replaceWorldObjectAt(ws, head, startPos);
         MoveSnake moveSnake = new MoveSnake(head, Direction.DOWN);
         moveSnake.transform(ws);
@@ -125,7 +124,7 @@ public class MoveSnakeTest {
         int startPos = 55;
         int obstaclePos = 56;
 
-        SnakeHead head = new SnakeHead("test", startPos);
+        SnakeHead head = new SnakeHead("test", "id", startPos);
         ws = SnakeTestUtil.replaceWorldObjectAt(ws, head, startPos);
         ws = SnakeTestUtil.replaceWorldObjectAt(ws, new Obstacle(), obstaclePos);
         MoveSnake moveSnake = new MoveSnake(head, Direction.RIGHT);
@@ -139,9 +138,9 @@ public class MoveSnakeTest {
         int startPos = 55;
         int otherSnakePos = 56;
 
-        SnakeHead head = new SnakeHead("test", startPos);
+        SnakeHead head = new SnakeHead("test", "id", startPos);
         ws = SnakeTestUtil.replaceWorldObjectAt(ws, head, startPos);
-        ws = SnakeTestUtil.replaceWorldObjectAt(ws, new SnakeHead("test2", otherSnakePos), otherSnakePos);
+        ws = SnakeTestUtil.replaceWorldObjectAt(ws, new SnakeHead("test2", "id", otherSnakePos), otherSnakePos);
         MoveSnake moveSnake = new MoveSnake(head, Direction.RIGHT);
         moveSnake.transform(ws);
     }
@@ -153,14 +152,13 @@ public class MoveSnakeTest {
         int startPos = 15;
         int expectedEndPos = 16;
 
-        SnakeHead head = new SnakeHead("test", startPos);
+        SnakeHead head = new SnakeHead("test", "id", startPos);
         ws = SnakeTestUtil.replaceWorldObjectAt(ws, head, startPos);
         ws = SnakeTestUtil.replaceWorldObjectAt(ws, new Food(), expectedEndPos);
         MoveSnake moveSnake = new MoveSnake(head, Direction.RIGHT);
         ws = moveSnake.transform(ws);
 
         assertEquals(expectedEndPos, head.getPosition());
-        assertEquals(Direction.RIGHT, head.getLastDirection());
 
         assertArrayEquals(new int[] { expectedEndPos }, ws.listPositionsWithContentOf(SnakeHead.class));
         assertArrayEquals(new int[] { startPos }, ws.listPositionsWithContentOf(SnakeBody.class));

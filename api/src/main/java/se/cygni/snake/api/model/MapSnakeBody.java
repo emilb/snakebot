@@ -9,17 +9,17 @@ public class MapSnakeBody implements TileContent {
     public static final String CONTENT = "snakebody";
 
     final boolean tail;
-    final int id;
+    final String playerId;
     final int order;
 
     @JsonCreator
     public MapSnakeBody(
             @JsonProperty("tail") boolean tail,
-            @JsonProperty("id") int id,
+            @JsonProperty("playerId") String playerId,
             @JsonProperty("order") int order)
     {
         this.tail = tail;
-        this.id = id;
+        this.playerId = playerId;
         this.order = order;
     }
 
@@ -32,8 +32,8 @@ public class MapSnakeBody implements TileContent {
         return tail;
     }
 
-    public int getId() {
-        return id;
+    public String getPlayerId() {
+        return playerId;
     }
 
     public int getOrder() {

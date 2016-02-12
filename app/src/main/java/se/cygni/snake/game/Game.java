@@ -4,11 +4,15 @@ package se.cygni.snake.game;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import se.cygni.game.Player;
+import se.cygni.game.enums.Direction;
 import se.cygni.snake.api.exception.InvalidPlayerName;
+import se.cygni.snake.api.model.GameSettings;
 import se.cygni.snake.api.request.RegisterMove;
-import se.cygni.snake.api.request.RegisterPlayer;
+import se.cygni.snake.api.request.RegisterPlayerTraining;
 import se.cygni.snake.api.response.PlayerRegistered;
 import se.cygni.snake.api.util.MessageUtils;
+import se.cygni.snake.apiconversion.DirectionConverter;
+import se.cygni.snake.apiconversion.GameSettingsConverter;
 import se.cygni.snake.player.IPlayer;
 import se.cygni.snake.player.RemotePlayer;
 
@@ -23,8 +27,15 @@ public class Game {
     private final EventBus outgoingEventBus;
     private final String gameId;
     private Set<IPlayer> players = Collections.synchronizedSet(new HashSet<>());
+    private final GameFeatures gameFeatures;
+    private final GameEngine gameEngine;
+    private final EventBus globalEventBus;
 
-    public Game() {
+    public Game(GameFeatures gameFeatures, EventBus globalEventBus) {
+
+        this.globalEventBus = globalEventBus;
+        this.gameFeatures = gameFeatures;
+        gameEngine = new GameEngine(gameFeatures, this);
         gameId = UUID.randomUUID().toString();
         incomingEventBus = new EventBus("game-" + gameId + "-incoming");
         incomingEventBus.register(this);
@@ -33,33 +44,57 @@ public class Game {
     }
 
     @Subscribe
-    public void registerPlayer(RegisterPlayer registerPlayer) {
-        Player player = new Player(registerPlayer.getPlayerName(), registerPlayer.getColor());
-        player.setPlayerId(registerPlayer.getPlayerId());
+    public void registerPlayer(RegisterPlayerTraining registerPlayerTraining) {
+        Player player = new Player(registerPlayerTraining.getPlayerName(), registerPlayerTraining.getColor());
+        player.setPlayerId(registerPlayerTraining.getRecievingPlayerId());
 
         if (players.contains(player)) {
             InvalidPlayerName playerNameTaken = new InvalidPlayerName(InvalidPlayerName.PlayerNameInvalidReason.Taken);
-            MessageUtils.copyCommonAttributes(registerPlayer, playerNameTaken);
+            MessageUtils.copyCommonAttributes(registerPlayerTraining, playerNameTaken);
             outgoingEventBus.post(playerNameTaken);
+            return;
         }
 
-        RemotePlayer remotePlayer = new RemotePlayer(player, this, outgoingEventBus);
+        RemotePlayer remotePlayer = new RemotePlayer(player, outgoingEventBus);
         addPlayer(remotePlayer);
 
-        PlayerRegistered playerRegistered = MessageUtils.copyCommonAttributes(registerPlayer, new PlayerRegistered());
-        playerRegistered.setGameId(gameId);
+        GameSettings gameSettings = GameSettingsConverter.toGameSettings(gameFeatures);
+        PlayerRegistered playerRegistered = new PlayerRegistered(gameId, player.getName(), player.getColor(), gameSettings);
+        MessageUtils.copyCommonAttributes(registerPlayerTraining, playerRegistered);
 
         outgoingEventBus.post(playerRegistered);
-
     }
 
     @Subscribe
     public void registerMove(RegisterMove registerMove) {
+        long gameTick = registerMove.getGameTick();
+        String playerId = registerMove.getRecievingPlayerId();
+        Direction direction = DirectionConverter.toDirection(registerMove.getDirection());
+        gameEngine.registerMove(
+                gameTick,
+                playerId,
+                direction
+        );
+    }
 
+    public void startGame() {
+        gameEngine.startGame();
     }
 
     public void addPlayer(IPlayer player) {
         players.add(player);
+    }
+
+    public Set<IPlayer> getPlayers() {
+        return players;
+    }
+
+    public int getNoofPlayers() {
+        return players.size();
+    }
+
+    public IPlayer getPlayer(String playerId) {
+        return players.stream().filter(player -> player.getPlayerId().equals(playerId)).findFirst().get();
     }
 
     public EventBus getOutgoingEventBus() {
@@ -72,5 +107,22 @@ public class Game {
 
     public String getGameId() {
         return gameId;
+    }
+
+    public GameEngine getGameEngine() {
+        return gameEngine;
+    }
+
+    public Set<IPlayer> getLivePlayers() {
+        // ToDo: filter out dead players
+        return getPlayers();
+    }
+
+    public void playerLostConnection(String playerId) {
+        getPlayer(playerId).dead();
+    }
+
+    public EventBus getGlobalEventBus() {
+        return globalEventBus;
     }
 }

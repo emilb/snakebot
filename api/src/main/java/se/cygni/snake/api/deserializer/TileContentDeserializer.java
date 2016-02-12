@@ -24,9 +24,9 @@ public class TileContentDeserializer extends JsonDeserializer<TileContent> {
         if (node.has("name"))
             name = node.get("name").asText();
 
-        int id = -1;
-        if (node.has("id"))
-            id = (Integer) ((IntNode) node.get("id")).numberValue();
+        String playerId = "";
+        if (node.has("playerId"))
+            playerId = node.get("playerId").asText();
 
         int order = -1;
         if (node.has("order"))
@@ -39,8 +39,8 @@ public class TileContentDeserializer extends JsonDeserializer<TileContent> {
         switch (content) {
             case MapObstacle.CONTENT  : return new MapObstacle();
             case MapFood.CONTENT      : return new MapFood();
-            case MapSnakeHead.CONTENT : return new MapSnakeHead(name, id);
-            case MapSnakeBody.CONTENT : return new MapSnakeBody(tail, id, order);
+            case MapSnakeHead.CONTENT : return new MapSnakeHead(name, playerId);
+            case MapSnakeBody.CONTENT : return new MapSnakeBody(tail, playerId, order);
             default: return new MapEmpty();
         }
     }

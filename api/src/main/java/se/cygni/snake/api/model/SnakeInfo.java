@@ -7,7 +7,7 @@ public class SnakeInfo {
 
     final String name;
     final int length;
-    final int id;
+    final String id;
     final int x;
     final int y;
 
@@ -15,7 +15,7 @@ public class SnakeInfo {
     public SnakeInfo(
             @JsonProperty("name") String name,
             @JsonProperty("length") int length,
-            @JsonProperty("id")int id,
+            @JsonProperty("playerId")String playerId,
             @JsonProperty("x")int x,
             @JsonProperty("y")int y
     )
@@ -23,7 +23,7 @@ public class SnakeInfo {
 
         this.name = name;
         this.length = length;
-        this.id = id;
+        this.id = playerId;
         this.x = x;
         this.y = y;
     }
@@ -36,7 +36,7 @@ public class SnakeInfo {
         return length;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 

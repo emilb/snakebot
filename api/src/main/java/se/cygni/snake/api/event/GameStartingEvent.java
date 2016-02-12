@@ -1,45 +1,45 @@
 package se.cygni.snake.api.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import se.cygni.snake.api.GameMessage;
 import se.cygni.snake.api.type.GameMessageType;
 
 @GameMessageType
 public class GameStartingEvent extends GameMessage {
 
-    private String gameId;
-    private int noofPlayers;
-    private int gameWidth;
-    private int gameHeight;
+    private final String gameId;
+    private final int noofPlayers;
+    private final int width;
+    private final int height;
+
+    @JsonCreator
+    public GameStartingEvent(
+            @JsonProperty("gameId") String gameId,
+            @JsonProperty("noofPlayers") int noofPlayers,
+            @JsonProperty("width") int width,
+            @JsonProperty("height") int gameHeight) {
+
+        this.gameId = gameId;
+        this.noofPlayers = noofPlayers;
+        this.width = width;
+        this.height = gameHeight;
+    }
 
     public String getGameId() {
         return gameId;
-    }
-
-    public void setGameId(String gameId) {
-        this.gameId = gameId;
     }
 
     public int getNoofPlayers() {
         return noofPlayers;
     }
 
-    public void setNoofPlayers(int noofPlayers) {
-        this.noofPlayers = noofPlayers;
+    public int getWidth() {
+        return width;
     }
 
-    public int getGameWidth() {
-        return gameWidth;
+    public int getHeight() {
+        return height;
     }
 
-    public void setGameWidth(int gameWidth) {
-        this.gameWidth = gameWidth;
-    }
-
-    public int getGameHeight() {
-        return gameHeight;
-    }
-
-    public void setGameHeight(int gameHeight) {
-        this.gameHeight = gameHeight;
-    }
 }

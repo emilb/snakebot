@@ -8,7 +8,7 @@ import se.cygni.snake.api.model.*;
 
 public class WorldStateConverter {
 
-    public Map convertWorldState(WorldState ws) {
+    public static Map convertWorldState(WorldState ws, long worldTick) {
 
         int width = ws.getWidth();
         int height = ws.getHeight();
@@ -19,11 +19,12 @@ public class WorldStateConverter {
         return new Map(
                 width,
                 height,
+                worldTick,
                 mapTiles,
                 snakeInfos);
     }
 
-    private SnakeInfo[] getSnakeInfos(WorldState ws) {
+    private static SnakeInfo[] getSnakeInfos(WorldState ws) {
         int[] snakeHeadPositions = ws.listPositionsWithContentOf(SnakeHead.class);
 
         if (snakeHeadPositions.length == 0) {
@@ -40,16 +41,16 @@ public class WorldStateConverter {
         return snakeInfos;
     }
 
-    private SnakeInfo getSnakeInfo(WorldState ws, SnakeHead head) {
+    private static SnakeInfo getSnakeInfo(WorldState ws, SnakeHead head) {
         String name = head.getName();
-        int id = name.hashCode();
+        String id = head.getPlayerId();
         int length = head.getLength();
         Coordinate coord = ws.translatePosition(head.getPosition());
 
         return new SnakeInfo(head.getName(), length, id, coord.getX(), coord.getY());
     }
 
-    private TileContent[][] getTileContents(WorldState ws) {
+    private static TileContent[][] getTileContents(WorldState ws) {
         int width = ws.getWidth();
         int height = ws.getHeight();
 
@@ -73,15 +74,15 @@ public class WorldStateConverter {
         return mapTiles;
     }
 
-    private void populateSnakes(WorldState ws, TileContent[][] mapTiles) {
+    private static void populateSnakes(WorldState ws, TileContent[][] mapTiles) {
         int[] headPositions = ws.listPositionsWithContentOf(SnakeHead.class);
         for (int position : headPositions) {
             SnakeHead snakeHead = (SnakeHead)ws.getTile(position).getContent();
             Coordinate headCoord = ws.translatePosition(position);
             String name = snakeHead.getName();
-            int id = name.hashCode();
+            String playerId = snakeHead.getPlayerId();
 
-            MapSnakeHead mapSnakeHead = new MapSnakeHead(name, id);
+            MapSnakeHead mapSnakeHead = new MapSnakeHead(name, playerId);
             mapTiles[headCoord.getX()][headCoord.getY()] = mapSnakeHead;
 
             SnakePart snakePart = snakeHead.getNextSnakePart();
@@ -89,14 +90,14 @@ public class WorldStateConverter {
             while (snakePart != null) {
                 Coordinate partCoord = ws.translatePosition(snakePart.getPosition());
                 boolean tail = snakePart.getNextSnakePart() == null;
-                mapTiles[partCoord.getX()][partCoord.getY()] = new MapSnakeBody(tail, id, counter++);
+                mapTiles[partCoord.getX()][partCoord.getY()] = new MapSnakeBody(tail, playerId, counter++);
 
                 snakePart = snakePart.getNextSnakePart();
             }
         }
     }
 
-    private TileContent convertWorldObject(WorldObject wo) {
+    private static TileContent convertWorldObject(WorldObject wo) {
 
         if (wo instanceof Obstacle) {
             return new MapObstacle();

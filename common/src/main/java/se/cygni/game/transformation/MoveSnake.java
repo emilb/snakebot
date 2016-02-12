@@ -31,7 +31,7 @@ public class MoveSnake implements WorldTransformation {
         try {
             targetSnakePos = currentWorld.getPositionForAdjacent(snakeHeadPos, direction);
         } catch (RuntimeException re) {
-            throw new WallCollision();
+            throw new WallCollision(snakeHeadPos);
         }
 
         // Target tile is not empty, check what's in it
@@ -41,10 +41,10 @@ public class MoveSnake implements WorldTransformation {
             WorldObject targetContent = targetTile.getContent();
 
             if (targetContent instanceof Obstacle)
-                throw new ObstacleCollision();
+                throw new ObstacleCollision(targetSnakePos);
 
             if (targetContent instanceof SnakePart)
-                throw new SnakeCollision();
+                throw new SnakeCollision(targetSnakePos);
 
             if (targetContent instanceof Food)
                 grow = true;
@@ -53,7 +53,6 @@ public class MoveSnake implements WorldTransformation {
         Tile[] tiles = currentWorld.getTiles();
 
         updateSnakeBody(tiles, targetSnakePos, snakeHead, grow);
-        snakeHead.setLastDirection(direction);
 
         return new WorldState(currentWorld.getWidth(), currentWorld.getHeight(), tiles);
     }
