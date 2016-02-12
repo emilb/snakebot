@@ -15,6 +15,14 @@ subprojects {
   }
 }
 
+allprojects {
+  gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+      options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+  }
+}
+
 task wrapper(type: Wrapper) {
     gradleVersion = '2.9'
 }

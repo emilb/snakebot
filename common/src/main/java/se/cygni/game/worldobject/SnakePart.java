@@ -1,4 +1,11 @@
 package se.cygni.game.worldobject;
 
-public class SnakePart implements WorldObject {
+public interface SnakePart extends WorldObject {
+
+    SnakePart getNextSnakePart();
+    void setNextSnakePart(SnakePart nextSnakePart);
+    boolean isHead();
+    boolean isTail();
+    int getPosition();
+    void setPosition(int position);
 }
