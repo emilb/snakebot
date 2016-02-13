@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-export default function startNewGame() {
-    return axios.get(`http://localhost:8080/newGame`)
+export default function getGame() {
+    return axios.get(`http://localhost:8080/getGame`)
         .then((world) => ({world: world.data}));
 }
 

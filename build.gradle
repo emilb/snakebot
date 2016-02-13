@@ -1,15 +1,8 @@
 subprojects {
 
-  apply plugin: 'java'
-  apply plugin: 'idea'
- 
-  sourceCompatibility = 1.8
-  targetCompatibility = 1.8
-  
-  repositories {
-    mavenCentral()
-  }
-
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    
   dependencies {
     testCompile "junit:junit:4.12"
     testCompile 'org.hamcrest:hamcrest-library:1.3'
