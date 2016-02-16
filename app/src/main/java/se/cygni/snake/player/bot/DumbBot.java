@@ -1,10 +1,9 @@
 package se.cygni.snake.player.bot;
 
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import se.cygni.game.Player;
-import se.cygni.game.WorldState;
-import se.cygni.snake.player.IPlayer;
+import com.google.common.eventbus.EventBus;
 
 public class DumbBot extends BotPlayer {
-
+    public DumbBot(String playerId, EventBus incomingEventbus) {
+        super(playerId, incomingEventbus);
+    }
 }

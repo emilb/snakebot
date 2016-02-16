@@ -41,18 +41,26 @@ public class GameFeatures {
 
     // Likelihood (in percent) that a new food will be
     // added to the world
-    public final int addFoodLikelihood = 15;
+    public int addFoodLikelihood = 15;
 
     // Likelihood (in percent) that a
     // food will be removed from the world
-    public final int removeFoodLikelihood = 5;
+    public int removeFoodLikelihood = 5;
 
     // Likelihood (in percent) that a new obstacle will be
     // added to the world
-    public final int addObstacleLikelihood = 15;
+    public int addObstacleLikelihood = 15;
 
     // Likelihood (in percent) that an
     // obstacle will be removed from the world
-    public final int removeObstacleLikelihood = 15;
+    public int removeObstacleLikelihood = 15;
+
+    // Snake grow every N world ticks.
+    // 0 for disabled
+    public int spontaneousGrowthEveryNWorldTick = 2;
+
+    // Indicates that this is a training game,
+    // Bots will be added to fill up remaining players.
+    public boolean trainingGame = false;
 
 }

@@ -1,5 +1,7 @@
 package se.cygni.snake.game;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import se.cygni.game.Coordinate;
 import se.cygni.game.WorldState;
 import se.cygni.game.enums.Direction;
@@ -9,14 +11,18 @@ import se.cygni.game.exception.TransformationException;
 import se.cygni.game.exception.WallCollision;
 import se.cygni.game.transformation.AddWorldObjectAtRandomPosition;
 import se.cygni.game.transformation.MoveSnake;
+import se.cygni.game.transformation.RemoveRandomWorldObject;
 import se.cygni.game.transformation.RemoveSnake;
+import se.cygni.game.worldobject.Food;
+import se.cygni.game.worldobject.Obstacle;
 import se.cygni.game.worldobject.SnakeHead;
-import se.cygni.snake.api.event.MapUpdateEvent;
 import se.cygni.snake.api.model.DeathReason;
 import se.cygni.snake.apiconversion.WorldStateConverter;
-import se.cygni.snake.player.IPlayer;
 
-import java.util.HashMap;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * GameEngine is responsible for:
@@ -27,18 +33,22 @@ import java.util.HashMap;
  * - Executing the rules from GameFeatures
  */
 public class GameEngine {
+    private static Logger log = LoggerFactory
+            .getLogger(GameEngine.class);
 
     private final GameFeatures gameFeatures;
     private final Game game;
     private WorldState world;
     private long currentWorldTick = 0;
     private java.util.Map<String, Direction> snakeDirections;
-    private WorldStateConverter converter;
+
+    private CountDownLatch countDownLatch;
+    private ConcurrentLinkedQueue<String> registerMoveQueue;
+
 
     public GameEngine(GameFeatures gameFeatures, Game game) {
         this.gameFeatures = gameFeatures;
         this.game = game;
-        this.converter = new WorldStateConverter();
     }
 
     public void startGame() {
@@ -70,37 +80,37 @@ public class GameEngine {
                 // Loop till winner is decided
                 while (isGameRunning()) {
 
-                    game.getPlayers().stream().forEach( player -> {
+                    countDownLatch = new CountDownLatch(game.getLivePlayers().size());
+                    registerMoveQueue = new ConcurrentLinkedQueue<>();
+
+                    long tstart = System.currentTimeMillis();
+                    game.getLivePlayers().stream().forEach( player -> {
                         player.onWorldUpdate(
                                 world, game.getGameId(), currentWorldTick
                         );
                     });
 
-                    // Todo: Fix this better
-                    MapUpdateEvent mue = new MapUpdateEvent(
-                            currentWorldTick,
-                            game.getGameId(),
-                            WorldStateConverter.convertWorldState(world, currentWorldTick));
-
-                    game.getGlobalEventBus().post(mue);
-
-                    // todo: change this to wait max time timeInMsPerTick but continue as soon as all clients have responded
                     try {
-                        Thread.sleep(gameFeatures.timeInMsPerTick);
+                        countDownLatch.await(gameFeatures.timeInMsPerTick, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
 
+                    long timeSpent = System.currentTimeMillis() - tstart;
+                    System.out.println("Tick: " + currentWorldTick + ", time waiting: " + timeSpent + "ms");
+                    //System.out.println("Tick: " + currentWorldTick + ", time waiting: " + timeSpent + "ms\n" +
+                    //        WorldStateConverter.convertWorldState(world, currentWorldTick).toString());
+
                     currentWorldTick++;
 
-                    // Make order of snake direction execution more fair (i.e. execute in order of
-                    // of incoming responses)
-                    int snakeHeadPositions[] = world.listPositionsWithContentOf(SnakeHead.class);
+                    List<SnakeHead> sortedSnakeHeads = getSortedSnakeHeads();
 
-                    for (int pos : snakeHeadPositions) {
-                        SnakeHead head = (SnakeHead)world.getTile(pos).getContent();
+                    for (SnakeHead head : sortedSnakeHeads) {
 
-                        MoveSnake move = new MoveSnake(head, snakeDirections.get(head.getPlayerId()));
+                        MoveSnake move = new MoveSnake(
+                                head,
+                                snakeDirections.get(head.getPlayerId()),
+                                spontaneousGrowth());
 
                         try {
                             world = move.transform(world);
@@ -124,6 +134,9 @@ public class GameEngine {
                         randomObstacle();
                     }
                 }
+
+                System.out.println("Tick: " + currentWorldTick + "\n" +
+                        WorldStateConverter.convertWorldState(world, currentWorldTick).toString());
             }
         };
 
@@ -131,11 +144,66 @@ public class GameEngine {
         t.start();
     }
 
+    private List<SnakeHead> getSortedSnakeHeads() {
+        ArrayList<SnakeHead> sortedHeads = new ArrayList<>();
+        Map<String, SnakeHead> snakeHeads = new HashMap<>();
+
+        int[] positions = world.listPositionsWithContentOf(SnakeHead.class);
+        for (int pos : positions) {
+            SnakeHead sh = (SnakeHead)world.getTile(pos).getContent();
+            snakeHeads.put(sh.getPlayerId(), sh);
+        }
+
+        for (String playerId : registerMoveQueue) {
+            sortedHeads.add(snakeHeads.get(playerId));
+        }
+
+        // Add any remaining SnakeHeads
+        if (sortedHeads.size() != positions.length) {
+            for (int pos : positions) {
+                SnakeHead sh = (SnakeHead)world.getTile(pos).getContent();
+                if (!sortedHeads.contains(sh))
+                    sortedHeads.add(sh);
+            }
+        }
+
+        return sortedHeads;
+    }
+
     private void randomObstacle() {
+        if (gameFeatures.removeObstacleLikelihood > (Math.random()*100.0)) {
+            RemoveRandomWorldObject<Obstacle> removeTransform =
+                    new RemoveRandomWorldObject<>(Obstacle.class);
+            world = removeTransform.transform(world);
+        }
+
+        if (gameFeatures.addObstacleLikelihood > (Math.random()*100.0)) {
+            AddWorldObjectAtRandomPosition addTransform =
+                    new AddWorldObjectAtRandomPosition(new Obstacle());
+            world = addTransform.transform(world);
+        }
     }
 
 
     private void randomFood() {
+        if (gameFeatures.removeFoodLikelihood > (Math.random()*100.0)) {
+            RemoveRandomWorldObject<Food> removeTransform =
+                    new RemoveRandomWorldObject<>(Food.class);
+            world = removeTransform.transform(world);
+        }
+
+        if (gameFeatures.addFoodLikelihood > (Math.random()*100.0)) {
+            AddWorldObjectAtRandomPosition addTransform =
+                    new AddWorldObjectAtRandomPosition(new Food());
+            world = addTransform.transform(world);
+        }
+    }
+
+    private boolean spontaneousGrowth() {
+        if (gameFeatures.spontaneousGrowthEveryNWorldTick > 0) {
+            return currentWorldTick % gameFeatures.spontaneousGrowthEveryNWorldTick == 0;
+        }
+        return false;
     }
 
     private void initSnakeDirections() {
@@ -146,25 +214,25 @@ public class GameEngine {
         });
     }
 
-    private boolean isGameRunning() {
+    public boolean isGameRunning() {
         return game.getLivePlayers().size() > 1;
     }
 
     public void registerMove(long gameTick, String playerId, Direction direction) {
-        IPlayer player = game.getPlayer(playerId);
-
+        // Todo: Possible sync problem here if a players registers move before game has actually started countDownLatch may be null.
         if (gameTick == currentWorldTick) {
+            registerMoveQueue.add(playerId);
             snakeDirections.put(playerId, direction);
+            countDownLatch.countDown();
         } else {
-
-//            if (player != null)
-//                player.onToLateRegisterMove(currentWorldTick, gameTick);
+            log.info("Player with id {} too late in registering move", playerId);
         }
     }
 
     private Direction getRandomDirection() {
-        // Todo: random direction
-        return Direction.DOWN;
+        int max = Direction.values().length-1;
+        Random r = new Random();
+        return Direction.values()[r.nextInt(max)];
     }
 
     private void snakeDied(SnakeHead head, DeathReason deathReason, int position) {

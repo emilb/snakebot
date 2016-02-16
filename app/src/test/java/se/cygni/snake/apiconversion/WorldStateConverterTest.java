@@ -190,6 +190,9 @@ public class WorldStateConverterTest {
                 }
             });
         });
+
+        // No snakeinfo
+        assertEquals(0, map.getSnakeInfos().length);
     }
 
     private Class getCorrespondingMapType(WorldObject obj) {

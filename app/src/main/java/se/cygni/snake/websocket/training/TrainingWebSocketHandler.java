@@ -61,10 +61,8 @@ public class TrainingWebSocketHandler extends TextWebSocketHandler {
         // Deserialize message
         GameMessage gameMessage = GameMessageParser.decodeMessage(message.getPayload());
 
-        // Add playerId if missing
-        if (StringUtils.isEmpty(gameMessage.getRecievingPlayerId())) {
-            gameMessage.setRecievingPlayerId(playerId);
-        }
+        // Overwrite playerId to hinder any cheating
+        gameMessage.setRecievingPlayerId(playerId);
 
         // Send to game
         incomingEventBus.post(gameMessage);

@@ -42,6 +42,6 @@ public class MapSnakeBody implements TileContent {
 
     @JsonIgnore
     public String toDisplay() {
-        return "SB";
+        return order+"";
     }
 }

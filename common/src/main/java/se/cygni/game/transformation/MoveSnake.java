@@ -13,10 +13,17 @@ public class MoveSnake implements WorldTransformation {
 
     private SnakeHead snakeHead;
     private Direction direction;
+    private boolean forceGrowth;
 
     public MoveSnake(SnakeHead snakeHead, Direction direction) {
         this.snakeHead = snakeHead;
         this.direction = direction;
+    }
+
+    public MoveSnake(SnakeHead snakeHead, Direction direction, boolean forceGrowth) {
+        this.snakeHead = snakeHead;
+        this.direction = direction;
+        this.forceGrowth = forceGrowth;
     }
 
     @Override
@@ -52,7 +59,7 @@ public class MoveSnake implements WorldTransformation {
 
         Tile[] tiles = currentWorld.getTiles();
 
-        updateSnakeBody(tiles, targetSnakePos, snakeHead, grow);
+        updateSnakeBody(tiles, targetSnakePos, snakeHead, grow || forceGrowth);
 
         return new WorldState(currentWorld.getWidth(), currentWorld.getHeight(), tiles);
     }

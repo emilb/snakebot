@@ -15,11 +15,13 @@ import se.cygni.snake.apiconversion.DirectionConverter;
 import se.cygni.snake.apiconversion.GameSettingsConverter;
 import se.cygni.snake.player.IPlayer;
 import se.cygni.snake.player.RemotePlayer;
+import se.cygni.snake.player.bot.RandomBot;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class Game {
 
@@ -78,6 +80,7 @@ public class Game {
     }
 
     public void startGame() {
+        initBotPlayers();
         gameEngine.startGame();
     }
 
@@ -114,8 +117,9 @@ public class Game {
     }
 
     public Set<IPlayer> getLivePlayers() {
-        // ToDo: filter out dead players
-        return getPlayers();
+        return getPlayers().stream().filter(player ->
+            player.isAlive()
+        ).collect(Collectors.toSet());
     }
 
     public void playerLostConnection(String playerId) {
@@ -124,5 +128,15 @@ public class Game {
 
     public EventBus getGlobalEventBus() {
         return globalEventBus;
+    }
+
+    private void initBotPlayers() {
+        if (!gameFeatures.trainingGame)
+            return;
+
+        for (int i = 0; i < gameFeatures.maxNoofPlayers - 1; i++) {
+            RandomBot rbot = new RandomBot(UUID.randomUUID().toString(), incomingEventBus);
+            addPlayer(rbot);
+        }
     }
 }

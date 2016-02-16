@@ -2,10 +2,6 @@ package se.cygni.snake.game;
 
 import org.junit.Before;
 import org.junit.Test;
-import se.cygni.game.WorldState;
-import se.cygni.game.worldobject.SnakeHead;
-
-import static org.junit.Assert.assertEquals;
 
 public class GameEngineTest {
 
@@ -17,22 +13,28 @@ public class GameEngineTest {
         GameFeatures gameFeatures = new GameFeatures();
         gameFeatures.width = 100;
         gameFeatures.height = 100;
-        gameFeatures.maxNoofPlayers = 2;
+        gameFeatures.timeInMsPerTick = 1000;
+        gameFeatures.maxNoofPlayers = 25;
+        gameFeatures.spontaneousGrowthEveryNWorldTick = 3;
+        gameFeatures.trainingGame = true;
 
         GameManager gameManager = new GameManager();
-        game = gameManager.createTrainingGame();
+        game = gameManager.createGame(gameFeatures);
+
         gameEngine = game.getGameEngine();
     }
 
-//    @Test
-//    public void testJoinGame() {
-//        TestPlayer tp = new TestPlayer("junit", "junit_id", game);
-//        game.addPlayer(tp);
-//
-//        game.startGame();
-//
-//        WorldState ws = gameEngine.getWorld();
-//        assertEquals(1, ws.listPositionsWithContentOf(SnakeHead.class).length);
-//    }
+    @Test
+    public void testSimpleGame() {
+        game.startGame();
+
+        do {
+            try {
+                Thread.sleep(10);
+            } catch (Exception e) {
+            }
+        } while (game.getGameEngine().isGameRunning());
+    }
+
 
 }

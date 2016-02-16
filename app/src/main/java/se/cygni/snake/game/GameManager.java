@@ -15,4 +15,8 @@ public class GameManager {
         return new Game(new GameFeatures(), globalEventBus);
     }
 
+    public Game createGame(GameFeatures gameFeatures) {
+        return new Game(gameFeatures, globalEventBus);
+    }
+
 }

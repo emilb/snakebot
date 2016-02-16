@@ -2,6 +2,7 @@ package se.cygni.game;
 
 import org.apache.commons.lang3.ArrayUtils;
 import se.cygni.game.enums.Direction;
+import se.cygni.game.exception.OutOfBoundsException;
 import se.cygni.game.worldobject.*;
 
 import java.util.stream.IntStream;
@@ -52,27 +53,17 @@ public class WorldState {
         return width * height;
     }
 
-//    public Tile getTile(Coordinate coordinate) {
-//        return getTile(translateCoordinate(coordinate));
-//    }
-
     public Tile getTile(int position) {
-        if (position < 0 || position > getSize())
-            throw new RuntimeException("Out of bounds on world matrix");
+        if (position < 0)
+            throw new OutOfBoundsException("Can not get tiles at negative position");
+        if (position >= getSize())
+            throw new OutOfBoundsException("Can not get tiles beyond world");
 
         return tiles[position];
     }
 
-    public boolean isTileEmpty(Coordinate coordinate) {
-        return isTileEmpty(translateCoordinate(coordinate));
-    }
-
     public boolean isTileEmpty(int position) {
         return isTileContentOfType(position, Empty.class);
-    }
-
-    public <T extends WorldObject> boolean isTileContentOfType(Coordinate coordinate, Class<T> clazz) {
-        return isTileContentOfType(translateCoordinate(coordinate), clazz);
     }
 
     public <T extends WorldObject> boolean isTileContentOfType(int position, Class<T> clazz) {
@@ -81,7 +72,7 @@ public class WorldState {
 
     public int getPositionForAdjacent(int position, Direction direction) {
         if (!hasAdjacentTile(position, direction))
-            throw new RuntimeException("Out of bounds on world matrix");
+            throw new OutOfBoundsException("Tile " + direction + " from position " + position + " is out of bounds");
 
         switch (direction) {
             case DOWN:  return position + width;

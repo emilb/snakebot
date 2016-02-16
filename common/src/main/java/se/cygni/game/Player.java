@@ -33,12 +33,12 @@ public class Player {
 
         Player player = (Player) o;
 
-        return name != null ? name.equals(player.name) : player.name == null;
+        return playerId != null ? playerId.equals(player.playerId) : player.playerId == null;
 
     }
 
     @Override
     public int hashCode() {
-        return name != null ? name.hashCode() : 0;
+        return playerId != null ? playerId.hashCode() : 0;
     }
 }

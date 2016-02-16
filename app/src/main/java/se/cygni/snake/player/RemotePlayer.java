@@ -92,4 +92,20 @@ public class RemotePlayer implements IPlayer {
     public String getPlayerId() {
         return player.getPlayerId();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RemotePlayer that = (RemotePlayer) o;
+
+        return player != null ? player.equals(that.player) : that.player == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return player != null ? player.hashCode() : 0;
+    }
 }

@@ -3,6 +3,7 @@ package se.cygni.game;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import se.cygni.game.enums.Direction;
+import se.cygni.game.exception.OutOfBoundsException;
 import se.cygni.game.testutil.SnakeTestUtil;
 import se.cygni.game.worldobject.Food;
 import se.cygni.game.worldobject.Obstacle;
@@ -12,10 +13,8 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
-
-//import static org.junit.Assert.*;
-
 
 public class WorldStateTest {
 
@@ -37,6 +36,31 @@ public class WorldStateTest {
         ws = new WorldState(10, 10, tiles);
 
         assertEquals(food, ws.getTile(12).getContent());
+    }
+
+    @Test(expected = OutOfBoundsException.class)
+    public void testGetTileNegativePosition() throws Exception {
+        WorldState ws = new WorldState(10, 10);
+        ws.getTile(-1);
+    }
+
+    @Test(expected = OutOfBoundsException.class)
+    public void testGetTileOutOfBounds() throws Exception {
+        WorldState ws = new WorldState(10, 10);
+        ws.getTile(100);
+    }
+
+    @Test
+    public void testGetTileBoundaryCheck() throws Exception {
+        WorldState ws = new WorldState(10, 10);
+        Food f1 = new Food();
+        Obstacle o1 = new Obstacle();
+
+        ws = SnakeTestUtil.replaceWorldObjectAt(ws, f1, 0);
+        ws = SnakeTestUtil.replaceWorldObjectAt(ws, o1, 99);
+
+        assertThat(ws.getTile(0).getContent(), equalTo(f1));
+        assertThat(ws.getTile(99).getContent(), equalTo(o1));
     }
 
     @Test
@@ -78,7 +102,7 @@ public class WorldStateTest {
         WorldState ws = SnakeTestUtil.createWorld(Food.class, 10, 10, 12);
 
         assertFalse(ws.isTileEmpty(12));
-        assertFalse(ws.isTileEmpty(new Coordinate(2,1)));
+        assertTrue(ws.isTileEmpty(0));
     }
 
     @Test

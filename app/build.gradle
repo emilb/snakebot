@@ -11,6 +11,7 @@ buildscript {
 }
 
 apply plugin: 'spring-boot'
+apply plugin: 'info.solidsoft.pitest'
 
 jar {
     baseName = 'snakebot-app'
@@ -19,6 +20,12 @@ jar {
 
 configurations {
     compile.exclude module: "spring-boot-starter-tomcat"
+}
+
+pitest {
+    targetClasses = ['se.cygni.snake.*']
+    threads = 4
+    outputFormats = ['XML', 'HTML']
 }
 
 dependencies {

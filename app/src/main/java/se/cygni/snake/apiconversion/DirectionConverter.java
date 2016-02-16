@@ -12,7 +12,7 @@ public class DirectionConverter {
             case LEFT: return Direction.LEFT;
             case RIGHT: return Direction.RIGHT;
         }
-        throw new RuntimeException("Could not convert SnakeDirektion: " + snakeDirection + " to Direction");
+        throw new RuntimeException("Could not convert SnakeDirection: " + snakeDirection + " to Direction");
     }
 
     public static SnakeDirection toSnakeDirection(Direction direction) {
@@ -22,6 +22,6 @@ public class DirectionConverter {
             case LEFT:  return SnakeDirection.LEFT;
             case RIGHT: return SnakeDirection.RIGHT;
         }
-        throw new RuntimeException("Could not convert Direktion: " + direction + " to SnakeDirection");
+        throw new RuntimeException("Could not convert Direction: " + direction + " to SnakeDirection");
     }
 }
