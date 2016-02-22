@@ -20,15 +20,20 @@ do
 	pwd=`printenv $user`
 	echo "$user has password: $pwd"
 	sudo adduser $user --gecos "$user,,," --disabled-password
+	echo "Setting password $pwd for user: $user"
 	echo $user:$pwd | chpasswd
 
 	# Add admin users to correct groups
+	echo "Adding $user to sudo"
 	usermod -aG sudo $user
+	echo "Adding $user to docker"
 	usermod -aG docker $user
+	echo "Adding $user to $common_group"
 	usermod -aG $common_group $user
 done
 
 # Reset root password
 pwd=`printenv root_user`
+echo "Setting root password to: $pwd"
 echo root:$pwd | chpasswd
 
