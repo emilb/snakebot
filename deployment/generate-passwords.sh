@@ -14,4 +14,4 @@ do
 done;
 
 rootpwd=`pwgen 16 1`
-echo "export root=$rootpwd" >> ~/passwords.sh
+echo "export root_user=$rootpwd" >> ~/passwords.sh
