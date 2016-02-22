@@ -31,7 +31,3 @@ done
 pwd=`printenv root_user`
 echo root:$pwd | chpasswd
 
-mkdir -p $docker_base_path/downloads
-chown -R :fileshare $docker_base_path/downloads
-chmod -R 775 $docker_base_path/downloads
-chmod -R 2775 $docker_base_path/downloads

@@ -23,7 +23,7 @@ cat << EOF > /etc/systemd/system/docker.service.d/override.conf
 EnvironmentFile=
 EnvironmentFile=-/etc/default/docker
 ExecStart=
-ExecStart=/usr/bin/docker -d \$DOCKER_OPTS -H fd://
+ExecStart=/usr/bin/docker \$DOCKER_OPTS -H fd://
 EOF
 
 cat << EOF > /etc/default/docker
