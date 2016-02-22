@@ -10,5 +10,8 @@ tokens=($password_keys)
 for token in "${tokens[@]}"
 do
 	pwd=`pwgen 16 1`
-	echo "export $token=$pwd" >> passwords.sh
+	echo "export $token=$pwd" >> ~/passwords.sh
 done;
+
+rootpwd=`pwgen 16 1`
+echo "export root=$rootpwd" >> ~/passwords.sh
