@@ -35,4 +35,13 @@ public class MapUpdateEvent extends GameMessage {
     public Map getMap() {
         return map;
     }
+
+    @Override
+    public String toString() {
+        return "MapUpdateEvent{" +
+                "gameTick=" + gameTick +
+                ", gameId='" + gameId + '\'' +
+                ", map=\n" + map +
+                '}';
+    }
 }

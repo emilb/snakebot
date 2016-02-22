@@ -42,4 +42,13 @@ public class GameStartingEvent extends GameMessage {
         return height;
     }
 
+    @Override
+    public String toString() {
+        return "GameStartingEvent{" +
+                "gameId='" + gameId + '\'' +
+                ", noofPlayers=" + noofPlayers +
+                ", width=" + width +
+                ", height=" + height +
+                '}';
+    }
 }

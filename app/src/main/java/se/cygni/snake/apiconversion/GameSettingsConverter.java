@@ -26,6 +26,7 @@ public class GameSettingsConverter {
     public static GameFeatures toGameFeatures(GameSettings gameSettings) {
         GameFeatures gameFeatures = new GameFeatures();
         BeanUtils.copyProperties(gameSettings, gameFeatures);
+        gameFeatures.applyValidation();
         return gameFeatures;
     }
 }

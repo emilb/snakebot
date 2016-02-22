@@ -1,5 +1,6 @@
 package se.cygni.snake.game;
 
+import com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.cygni.game.Coordinate;
@@ -18,11 +19,13 @@ import se.cygni.game.worldobject.Obstacle;
 import se.cygni.game.worldobject.SnakeHead;
 import se.cygni.snake.api.model.DeathReason;
 import se.cygni.snake.apiconversion.WorldStateConverter;
+import se.cygni.snake.event.InternalGameEvent;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * GameEngine is responsible for:
@@ -36,24 +39,36 @@ public class GameEngine {
     private static Logger log = LoggerFactory
             .getLogger(GameEngine.class);
 
-    private final GameFeatures gameFeatures;
+    private GameFeatures gameFeatures;
     private final Game game;
     private WorldState world;
     private long currentWorldTick = 0;
     private java.util.Map<String, Direction> snakeDirections;
+    private AtomicBoolean allowedToRun = new AtomicBoolean(false);
+    private final EventBus globalEventBus;
 
     private CountDownLatch countDownLatch;
     private ConcurrentLinkedQueue<String> registerMoveQueue;
 
 
-    public GameEngine(GameFeatures gameFeatures, Game game) {
+    public GameEngine(GameFeatures gameFeatures, Game game, EventBus globalEventBus) {
         this.gameFeatures = gameFeatures;
         this.game = game;
+        this.globalEventBus = globalEventBus;
+    }
+
+    public void reApplyGameFeatures(GameFeatures gameFeatures) {
+        this.gameFeatures = gameFeatures;
     }
 
     public void startGame() {
+        allowedToRun.set(true);
         initGame();
         gameLoop();
+    }
+
+    public void abort() {
+        allowedToRun.set(false);
     }
 
     private void initGame() {
@@ -69,6 +84,10 @@ public class GameEngine {
         game.getPlayers().stream().forEach( player -> {
             player.onGameStart(game.getGameId(), game.getNoofPlayers(), world.getWidth(), world.getHeight());
         });
+
+        InternalGameEvent gevent = new InternalGameEvent(System.currentTimeMillis());
+        gevent.onGameStart(game.getGameId(), game.getNoofPlayers(), world.getWidth(), world.getHeight());
+        globalEventBus.post(gevent);
     }
 
     private void gameLoop() {
@@ -90,6 +109,10 @@ public class GameEngine {
                         );
                     });
 
+                    InternalGameEvent gevent = new InternalGameEvent(System.currentTimeMillis());
+                    gevent.onWorldUpdate(world, game.getGameId(), currentWorldTick);
+                    globalEventBus.post(gevent);
+
                     try {
                         countDownLatch.await(gameFeatures.timeInMsPerTick, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException e) {
@@ -98,8 +121,6 @@ public class GameEngine {
 
                     long timeSpent = System.currentTimeMillis() - tstart;
                     System.out.println("Tick: " + currentWorldTick + ", time waiting: " + timeSpent + "ms");
-                    //System.out.println("Tick: " + currentWorldTick + ", time waiting: " + timeSpent + "ms\n" +
-                    //        WorldStateConverter.convertWorldState(world, currentWorldTick).toString());
 
                     currentWorldTick++;
 
@@ -134,6 +155,23 @@ public class GameEngine {
                         randomObstacle();
                     }
                 }
+
+                game.getPlayers().stream().forEach( player -> {
+                    player.onGameEnded(
+                            "",
+                            game.getGameId(),
+                            currentWorldTick,
+                            world
+                    );
+                });
+
+                InternalGameEvent gevent = new InternalGameEvent(System.currentTimeMillis());
+                gevent.onGameEnded("",
+                        game.getGameId(),
+                        currentWorldTick,
+                        world);
+                globalEventBus.post(gevent);
+                globalEventBus.post(gevent.getGameMessage());
 
                 System.out.println("Tick: " + currentWorldTick + "\n" +
                         WorldStateConverter.convertWorldState(world, currentWorldTick).toString());
@@ -215,7 +253,9 @@ public class GameEngine {
     }
 
     public boolean isGameRunning() {
-        return game.getLivePlayers().size() > 1;
+        return (allowedToRun.get() &&
+                game.getLiveAndRemotePlayers().size() > 0);
+
     }
 
     public void registerMove(long gameTick, String playerId, Direction direction) {
@@ -253,5 +293,13 @@ public class GameEngine {
                     game.getGameId(), currentWorldTick
             );
         });
+
+        InternalGameEvent gevent = new InternalGameEvent(System.currentTimeMillis());
+        gevent.onPlayerDied(deathReason,
+                head.getPlayerId(),
+                coordinate.getX(), coordinate.getY(),
+                game.getGameId(), currentWorldTick
+        );
+        globalEventBus.post(gevent);
     }
 }

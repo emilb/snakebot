@@ -6,27 +6,12 @@
         <!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder 
             by default -->
         <encoder>
-            <pattern>%date{HH:mm:ss.SSS} %-5level %logger{0} - %msg \(%t\) %n</pattern>
+            <pattern>%green(%date{HH:mm:ss.SSS}) %highlight(%-5level) %boldYellow(%logger{0}) - %highlight(%msg) %cyan(\(%t\)) %n</pattern>
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${jetty.logs}/snake.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- daily rollover -->
-            <fileNamePattern>snake.%d{yyyy-MM-dd}.log</fileNamePattern>
-
-            <!-- keep 30 days' worth of history -->
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
-
-        <encoder>
-            <pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{0} - %msg \(%t\) %n</pattern>
-        </encoder>
-    </appender>
-
-    <logger name="se" level="INFO"/>
-    <root level="WARN">
+    <logger name="se" level="DEBUG"/>
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
 

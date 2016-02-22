@@ -1,5 +1,6 @@
 package se.cygni.snake.game;
 
+import com.google.common.eventbus.EventBus;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,14 +12,14 @@ public class GameEngineTest {
     @Before
     public void setup() {
         GameFeatures gameFeatures = new GameFeatures();
-        gameFeatures.width = 100;
-        gameFeatures.height = 100;
+        gameFeatures.width = 15;
+        gameFeatures.height = 15;
         gameFeatures.timeInMsPerTick = 1000;
         gameFeatures.maxNoofPlayers = 25;
-        gameFeatures.spontaneousGrowthEveryNWorldTick = 3;
+        gameFeatures.spontaneousGrowthEveryNWorldTick = 2;
         gameFeatures.trainingGame = true;
 
-        GameManager gameManager = new GameManager();
+        GameManager gameManager = new GameManager(new EventBus());
         game = gameManager.createGame(gameFeatures);
 
         gameEngine = game.getGameEngine();

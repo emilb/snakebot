@@ -9,7 +9,7 @@ public interface IPlayer {
 
     public void onPlayerDied(DeathReason reason, String playerId, int x, int y, String gameId, long gameTick);
 
-    public void onGameWon(String playerWinnerId, String gameId, long gameTick, WorldState worldState);
+    public void onGameEnded(String playerWinnerId, String gameId, long gameTick, WorldState worldState);
 
     public void onGameStart(String gameId, int noofPlayers, int width, int height);
 

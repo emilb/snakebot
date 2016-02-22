@@ -27,7 +27,7 @@ public abstract class BotPlayer implements IPlayer {
     }
 
     @Override
-    public void onGameWon(String playerWinnerId, String gameId, long gameTick, WorldState worldState) {
+    public void onGameEnded(String playerWinnerId, String gameId, long gameTick, WorldState worldState) {
 
     }
 
@@ -48,7 +48,7 @@ public abstract class BotPlayer implements IPlayer {
 
     @Override
     public String getName() {
-        return null;
+        return this.getClass().getSimpleName();
     }
 
     @Override

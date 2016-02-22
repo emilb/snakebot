@@ -79,4 +79,16 @@ public class SnakeDeadEvent extends GameMessage {
     public long getGameTick() {
         return gameTick;
     }
+
+    @Override
+    public String toString() {
+        return "SnakeDeadEvent{" +
+                "deathReason=" + deathReason +
+                ", playerId='" + playerId + '\'' +
+                ", x=" + x +
+                ", y=" + y +
+                ", gameId='" + gameId + '\'' +
+                ", gameTick=" + gameTick +
+                '}';
+    }
 }

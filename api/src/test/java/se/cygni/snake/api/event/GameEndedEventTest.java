@@ -10,7 +10,7 @@ public class GameEndedEventTest {
     @Test
     public void testSerializationGameEndedEvent() throws Exception {
         GameEndedEvent gee = new GameEndedEvent("playerWinnerId", "666", 4, null);
-        TestUtil.populateBaseData(gee, "rPlayerId", "correlationId", "messageId");
+        TestUtil.populateBaseData(gee, "rPlayerId");
 
         String serialized = GameMessageParser.encodeMessage(gee);
         GameEndedEvent parsedgee = (GameEndedEvent)GameMessageParser.decodeMessage(serialized);
@@ -18,8 +18,6 @@ public class GameEndedEventTest {
         assertEquals("playerWinnerId", parsedgee.getPlayerWinnerId());
         assertEquals("666", parsedgee.getGameId());
         assertEquals(4, parsedgee.getGameTick());
-        assertEquals("rPlayerId", parsedgee.getRecievingPlayerId());
-        assertEquals("correlationId", parsedgee.getCorrelationId());
-        assertEquals("messageId", parsedgee.getMessageId());
+        assertEquals("rPlayerId", parsedgee.getReceivingPlayerId());
     }
 }

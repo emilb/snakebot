@@ -150,6 +150,26 @@ public class GameSettings {
         return removeObstacleLikelihood;
     }
 
+    @Override
+    public String toString() {
+        return "GameSettings{" +
+                "width=" + width +
+                ", height=" + height +
+                ", maxNoofPlayers=" + maxNoofPlayers +
+                ", startSnakeLength=" + startSnakeLength +
+                ", timeInMsPerTick=" + timeInMsPerTick +
+                ", obstaclesEnabled=" + obstaclesEnabled +
+                ", foodEnabled=" + foodEnabled +
+                ", edgeWrapsAround=" + edgeWrapsAround +
+                ", headToTailConsumes=" + headToTailConsumes +
+                ", tailConsumeGrows=" + tailConsumeGrows +
+                ", addFoodLikelihood=" + addFoodLikelihood +
+                ", removeFoodLikelihood=" + removeFoodLikelihood +
+                ", addObstacleLikelihood=" + addObstacleLikelihood +
+                ", removeObstacleLikelihood=" + removeObstacleLikelihood +
+                '}';
+    }
+
     public static class GameSettingsBuilder {
         // World width
         private int width = 500;

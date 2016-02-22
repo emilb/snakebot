@@ -8,8 +8,7 @@ import se.cygni.snake.api.event.GameStartingEvent;
 import se.cygni.snake.api.event.MapUpdateEvent;
 import se.cygni.snake.api.event.SnakeDeadEvent;
 import se.cygni.snake.api.model.DeathReason;
-import se.cygni.snake.api.util.MessageUtils;
-import se.cygni.snake.apiconversion.WorldStateConverter;
+import se.cygni.snake.apiconversion.GameMessageConverter;
 
 public class RemotePlayer implements IPlayer {
 
@@ -25,12 +24,8 @@ public class RemotePlayer implements IPlayer {
     @Override
     public void onWorldUpdate(WorldState worldState, String gameId, long gameTick) {
 
-        MapUpdateEvent mue = new MapUpdateEvent(
-                gameTick,
-                gameId,
-                WorldStateConverter.convertWorldState(worldState, gameTick));
-        MessageUtils.populateMessageIds(mue);
-        mue.setRecievingPlayerId(player.getPlayerId());
+        MapUpdateEvent mue = GameMessageConverter.onWorldUpdate(worldState, gameId, gameTick);
+        mue.setReceivingPlayerId(player.getPlayerId());
 
         outgoingEventBus.post(mue);
     }
@@ -38,22 +33,17 @@ public class RemotePlayer implements IPlayer {
     @Override
     public void onPlayerDied(DeathReason reason, String playerId, int x, int y, String gameId, long gameTick) {
 
-        SnakeDeadEvent sde = new SnakeDeadEvent(reason, playerId, x, y, gameId, gameTick);
-        MessageUtils.populateMessageIds(sde);
-        sde.setRecievingPlayerId(player.getPlayerId());
+        SnakeDeadEvent sde = GameMessageConverter.onPlayerDied(reason, playerId, x, y, gameId, gameTick);
+        sde.setReceivingPlayerId(player.getPlayerId());
 
         outgoingEventBus.post(sde);
     }
 
     @Override
-    public void onGameWon(String playerWinnerId, String gameId, long gameTick, WorldState worldState) {
+    public void onGameEnded(String playerWinnerId, String gameId, long gameTick, WorldState worldState) {
 
-        GameEndedEvent gee = new GameEndedEvent(
-                playerWinnerId, gameId, gameTick,
-                WorldStateConverter.convertWorldState(worldState, gameTick)
-        );
-        MessageUtils.populateMessageIds(gee);
-        gee.setRecievingPlayerId(player.getPlayerId());
+        GameEndedEvent gee = GameMessageConverter.onGameEnded(playerWinnerId, gameId, gameTick, worldState);
+        gee.setReceivingPlayerId(player.getPlayerId());
 
         outgoingEventBus.post(gee);
     }
@@ -61,9 +51,8 @@ public class RemotePlayer implements IPlayer {
     @Override
     public void onGameStart(String gameId, int noofPlayers, int width, int height) {
 
-        GameStartingEvent gse = new GameStartingEvent(gameId, noofPlayers, width, height);
-        MessageUtils.populateMessageIds(gse);
-        gse.setRecievingPlayerId(player.getPlayerId());
+        GameStartingEvent gse = GameMessageConverter.onGameStart(gameId, noofPlayers, width, height);
+        gse.setReceivingPlayerId(player.getPlayerId());
 
         outgoingEventBus.post(gse);
     }

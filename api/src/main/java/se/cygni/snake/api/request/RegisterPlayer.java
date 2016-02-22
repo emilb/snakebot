@@ -7,14 +7,23 @@ import se.cygni.snake.api.model.GameSettings;
 import se.cygni.snake.api.type.GameMessageType;
 
 @GameMessageType
-public class RegisterPlayerTraining extends GameMessage {
+public class RegisterPlayer extends GameMessage {
 
     private final String playerName;
     private final String color;
     private final GameSettings gameSettings;
 
+    public RegisterPlayer(
+            String playerName,
+            String color) {
+
+        this.playerName = playerName;
+        this.color = color;
+        this.gameSettings = null;
+    }
+
     @JsonCreator
-    public RegisterPlayerTraining(
+    public RegisterPlayer(
             @JsonProperty("playerName") String playerName,
             @JsonProperty("color") String color,
             @JsonProperty("gameSettings") GameSettings gameSettings) {

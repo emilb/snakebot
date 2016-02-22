@@ -3,6 +3,7 @@ package se.cygni.snake.websocket.event;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,30 +18,45 @@ import se.cygni.game.worldobject.Food;
 import se.cygni.game.worldobject.Obstacle;
 import se.cygni.game.worldobject.SnakeBody;
 import se.cygni.game.worldobject.SnakeHead;
+import se.cygni.snake.api.GameMessage;
 import se.cygni.snake.api.GameMessageParser;
 import se.cygni.snake.api.event.MapUpdateEvent;
 import se.cygni.snake.api.model.Map;
 import se.cygni.snake.apiconversion.WorldStateConverter;
+import se.cygni.snake.event.InternalGameEvent;
+import se.cygni.snake.game.Game;
+import se.cygni.snake.game.GameManager;
+import se.cygni.snake.websocket.event.api.*;
 
+import java.io.IOException;
+
+/**
+ * This is a per-connection websocket. That means a new instance will
+ * be created for each connecting client.
+ */
 public class EventSocketHandler extends TextWebSocketHandler {
 
-    private static Logger logger = LoggerFactory.getLogger(EventSocketHandler.class);
-
-    @Autowired
-    EventBus globalEventBus;
+    private static Logger log = LoggerFactory.getLogger(EventSocketHandler.class);
 
     private WebSocketSession session;
+    private String[] filterGameIds = new String[0];
+    private EventBus globalEventBus;
+    private GameManager gameManager;
 
-    private boolean isConnected = false;
-
-    public EventSocketHandler() {
-        //globalEventBus.register(this);
-        logger.info("EventSocketHandler started!");
+    @Autowired
+    public EventSocketHandler(EventBus globalEventBus, GameManager gameManager) {
+        this.globalEventBus = globalEventBus;
+        this.gameManager = gameManager;
+        log.info("EventSocketHandler started!");
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        logger.info("Opened new session in instance " + this);
+        log.info("Opened new event session for " + session.getId());
+        this.session = session;
+        globalEventBus.register(this);
+
+        /*
         this.session = session;
         isConnected = true;
         // Lambda Runnable
@@ -51,39 +67,91 @@ public class EventSocketHandler extends TextWebSocketHandler {
                     session.sendMessage(new TextMessage(GameMessageParser.encodeMessage(getRandomMapUpdateEvent(worldTick))));
                     worldTick++;
                     Thread.sleep(250);
-                    logger.info("World tick: {}", worldTick);
+                    log.info("World tick: {}", worldTick);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         };
         new Thread(eventGenerator).start();
+        */
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        super.afterConnectionClosed(session, status);
+        globalEventBus.unregister(this);
+        log.info("Removed session: {}", session.getId());
     }
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message)
             throws Exception {
-        logger.debug(message.getPayload());
-        session.sendMessage(new TextMessage(message.getPayload()));
+        log.debug(message.getPayload());
+        ApiMessage apiMessage = ApiMessageParser.decodeMessage(message.getPayload());
+
+        if (apiMessage instanceof ListActiveGames) {
+            sendListOfActiveGames();
+        } else if (apiMessage instanceof SetGameFilter) {
+            setActiveGameFilter((SetGameFilter)apiMessage);
+        } else if (apiMessage instanceof StartGame) {
+            startGame((StartGame)apiMessage);
+        }
     }
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception)
             throws Exception {
+
         session.close(CloseStatus.SERVER_ERROR);
-        isConnected = false;
+        globalEventBus.unregister(this);
+        log.info("Transport error, removed session: {}", session.getId());
     }
 
     @Subscribe
-    public void onMapUpdate(MapUpdateEvent event) {
-//        try {
-//            session.sendMessage(new TextMessage(GameMessageParser.encodeMessage(event)));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+    public void onInternalGameEvent(InternalGameEvent event) {
+
+        log.info("EventSocketHandler got a message: " + event.getGameMessage().getType());
+        sendEvent(event.getGameMessage());
     }
 
+    private void sendEvent(GameMessage message) {
+        if (!session.isOpen())
+            return;
 
+        try {
+            String gameId = org.apache.commons.beanutils.BeanUtils.getProperty(message, "gameId");
+            if (ArrayUtils.contains(filterGameIds, gameId)) {
+                session.sendMessage(new TextMessage(GameMessageParser.encodeMessage(message)));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendListOfActiveGames() {
+        ActiveGamesList gamesList = new ActiveGamesList(gameManager.listGameIds());
+        try {
+            if (session.isOpen()) {
+                session.sendMessage(new TextMessage(ApiMessageParser.encodeMessage(gamesList)));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setActiveGameFilter(SetGameFilter gameFilter) {
+        this.filterGameIds = gameFilter.getIncludedGameIds();
+    }
+
+    private void startGame(StartGame apiMessage) {
+        Game game = gameManager.getGame(apiMessage.getGameId());
+        if (game != null) {
+            log.info("Starting game: {}", game.getGameId());
+            log.info("Active remote players: {}", game.getLiveAndRemotePlayers().size());
+            game.startGame();
+        }
+    }
 
     private MapUpdateEvent getRandomMapUpdateEvent(long gameTick) {
         return new MapUpdateEvent(gameTick, "666", getRandomMap());

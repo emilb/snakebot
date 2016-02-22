@@ -3,12 +3,16 @@ package se.cygni.snake.game;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import se.cygni.game.Player;
 import se.cygni.game.enums.Direction;
 import se.cygni.snake.api.exception.InvalidPlayerName;
+import se.cygni.snake.api.model.GameMode;
 import se.cygni.snake.api.model.GameSettings;
 import se.cygni.snake.api.request.RegisterMove;
-import se.cygni.snake.api.request.RegisterPlayerTraining;
+import se.cygni.snake.api.request.RegisterPlayer;
+import se.cygni.snake.api.request.StartGame;
 import se.cygni.snake.api.response.PlayerRegistered;
 import se.cygni.snake.api.util.MessageUtils;
 import se.cygni.snake.apiconversion.DirectionConverter;
@@ -24,12 +28,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Game {
+    private static Logger log = LoggerFactory
+            .getLogger(Game.class);
 
     private final EventBus incomingEventBus;
     private final EventBus outgoingEventBus;
     private final String gameId;
     private Set<IPlayer> players = Collections.synchronizedSet(new HashSet<>());
-    private final GameFeatures gameFeatures;
+    private GameFeatures gameFeatures;
     private final GameEngine gameEngine;
     private final EventBus globalEventBus;
 
@@ -37,7 +43,7 @@ public class Game {
 
         this.globalEventBus = globalEventBus;
         this.gameFeatures = gameFeatures;
-        gameEngine = new GameEngine(gameFeatures, this);
+        gameEngine = new GameEngine(gameFeatures, this, globalEventBus);
         gameId = UUID.randomUUID().toString();
         incomingEventBus = new EventBus("game-" + gameId + "-incoming");
         incomingEventBus.register(this);
@@ -46,13 +52,21 @@ public class Game {
     }
 
     @Subscribe
-    public void registerPlayer(RegisterPlayerTraining registerPlayerTraining) {
-        Player player = new Player(registerPlayerTraining.getPlayerName(), registerPlayerTraining.getColor());
-        player.setPlayerId(registerPlayerTraining.getRecievingPlayerId());
+    public void startGame(StartGame startGame) {
+        if (gameFeatures.trainingGame) {
+            log.debug("Starting game");
+            startGame();
+        }
+    }
+
+    @Subscribe
+    public void registerPlayer(RegisterPlayer registerPlayer) {
+        Player player = new Player(registerPlayer.getPlayerName(), registerPlayer.getColor());
+        player.setPlayerId(registerPlayer.getReceivingPlayerId());
 
         if (players.contains(player)) {
             InvalidPlayerName playerNameTaken = new InvalidPlayerName(InvalidPlayerName.PlayerNameInvalidReason.Taken);
-            MessageUtils.copyCommonAttributes(registerPlayerTraining, playerNameTaken);
+            MessageUtils.copyCommonAttributes(registerPlayer, playerNameTaken);
             outgoingEventBus.post(playerNameTaken);
             return;
         }
@@ -60,9 +74,17 @@ public class Game {
         RemotePlayer remotePlayer = new RemotePlayer(player, outgoingEventBus);
         addPlayer(remotePlayer);
 
+        // If this is a training game changes to settings are allowed
+        GameSettings requestedGameSettings = registerPlayer.getGameSettings();
+        if (gameFeatures.trainingGame && requestedGameSettings != null) {
+            gameFeatures = GameSettingsConverter.toGameFeatures(requestedGameSettings);
+            gameFeatures.trainingGame = true; // Just to be sure
+            gameEngine.reApplyGameFeatures(gameFeatures);
+        }
+
         GameSettings gameSettings = GameSettingsConverter.toGameSettings(gameFeatures);
-        PlayerRegistered playerRegistered = new PlayerRegistered(gameId, player.getName(), player.getColor(), gameSettings);
-        MessageUtils.copyCommonAttributes(registerPlayerTraining, playerRegistered);
+        PlayerRegistered playerRegistered = new PlayerRegistered(gameId, player.getName(), player.getColor(), gameSettings, GameMode.training);
+        MessageUtils.copyCommonAttributes(registerPlayer, playerRegistered);
 
         outgoingEventBus.post(playerRegistered);
     }
@@ -70,7 +92,7 @@ public class Game {
     @Subscribe
     public void registerMove(RegisterMove registerMove) {
         long gameTick = registerMove.getGameTick();
-        String playerId = registerMove.getRecievingPlayerId();
+        String playerId = registerMove.getReceivingPlayerId();
         Direction direction = DirectionConverter.toDirection(registerMove.getDirection());
         gameEngine.registerMove(
                 gameTick,
@@ -80,6 +102,10 @@ public class Game {
     }
 
     public void startGame() {
+        if (gameEngine.isGameRunning()) {
+            return;
+        }
+
         initBotPlayers();
         gameEngine.startGame();
     }
@@ -122,6 +148,12 @@ public class Game {
         ).collect(Collectors.toSet());
     }
 
+    public Set<IPlayer> getLiveAndRemotePlayers() {
+        return getPlayers().stream().filter(player ->
+                player.isAlive() && player instanceof RemotePlayer
+        ).collect(Collectors.toSet());
+    }
+
     public void playerLostConnection(String playerId) {
         getPlayer(playerId).dead();
     }
@@ -138,5 +170,10 @@ public class Game {
             RandomBot rbot = new RandomBot(UUID.randomUUID().toString(), incomingEventBus);
             addPlayer(rbot);
         }
+    }
+
+    public void abort() {
+        players.clear();
+        gameEngine.abort();
     }
 }

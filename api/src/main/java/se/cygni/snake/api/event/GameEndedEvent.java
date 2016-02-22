@@ -43,4 +43,14 @@ public class GameEndedEvent extends GameMessage {
     public Map getMap() {
         return map;
     }
+
+    @Override
+    public String toString() {
+        return "GameEndedEvent{" +
+                "playerWinnerId='" + playerWinnerId + '\'' +
+                ", gameId='" + gameId + '\'' +
+                ", gameTick=" + gameTick +
+                ", map=\n" + map +
+                '}';
+    }
 }

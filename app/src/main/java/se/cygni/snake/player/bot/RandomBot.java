@@ -42,7 +42,7 @@ public class RandomBot extends BotPlayer {
             rndDirection = getRandomDirection(validDirections);
 
         RegisterMove registerMove = new RegisterMove(gameTick, rndDirection);
-        registerMove.setRecievingPlayerId(playerId);
+        registerMove.setReceivingPlayerId(playerId);
         incomingEventbus.post(
                 registerMove);
     }
@@ -92,14 +92,11 @@ public class RandomBot extends BotPlayer {
     }
 
     @Override
-    public void onGameWon(String playerWinnerId, String gameId, long gameTick, WorldState worldState) {
-        super.onGameWon(playerWinnerId, gameId, gameTick, worldState);
+    public void onGameEnded(String playerWinnerId, String gameId, long gameTick, WorldState worldState) {
+        super.onGameEnded(playerWinnerId, gameId, gameTick, worldState);
     }
 
     @Override
     public void onGameStart(String gameId, int noofPlayers, int width, int height) {
-        System.out.println("On game start!");
-        System.out.println("Gameid: " + gameId);
-        System.out.println("noof players: " + noofPlayers);
     }
 }

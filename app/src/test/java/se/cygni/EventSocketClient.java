@@ -1,38 +1,53 @@
 package se.cygni;
 
 import org.springframework.web.socket.*;
+import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.sockjs.client.RestTemplateXhrTransport;
-import org.springframework.web.socket.sockjs.client.SockJsClient;
-import org.springframework.web.socket.sockjs.client.Transport;
-import org.springframework.web.socket.sockjs.client.WebSocketTransport;
-
-import java.util.ArrayList;
-import java.util.List;
+import se.cygni.snake.websocket.event.api.*;
 
 public class EventSocketClient {
     public static void main(String[] args) {
-        List<Transport> transports = new ArrayList<>(2);
-        transports.add(new WebSocketTransport(new StandardWebSocketClient()));
-        transports.add(new RestTemplateXhrTransport());
 
-        SockJsClient sockJsClient = new SockJsClient(transports);
+        WebSocketClient wsClient = new StandardWebSocketClient();
 
-        sockJsClient.doHandshake(new WebSocketHandler() {
+        wsClient.doHandshake(new WebSocketHandler() {
             @Override
             public void afterConnectionEstablished(WebSocketSession session) throws Exception {
                 System.out.println("connected");
-                session.sendMessage(new TextMessage("Emil was here"));
+                ListActiveGames listActiveGames = new ListActiveGames();
+
+                Runnable eventGenerator = () -> {
+                    while (session.isOpen()) {
+                        try {
+                            session.sendMessage(new TextMessage(ApiMessageParser.encodeMessage(listActiveGames)));
+                            Thread.sleep(250);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                new Thread(eventGenerator).start();
             }
 
             @Override
             public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
                 System.out.println(message.getPayload());
+
+                // Just start the first game
+                ApiMessage apiMessage = ApiMessageParser.decodeMessage(message.getPayload().toString());
+                if (apiMessage instanceof ActiveGamesList) {
+                    ActiveGamesList agl = (ActiveGamesList)apiMessage;
+                    if (agl.getActiveGameIds().length > 0) {
+                        StartGame startGame = new StartGame(agl.getActiveGameIds()[0]);
+                        session.sendMessage(new TextMessage(ApiMessageParser.encodeMessage(startGame)));
+                    }
+                }
             }
 
             @Override
             public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
                 System.out.println("transport error ");
+                exception.printStackTrace();
             }
 
             @Override
@@ -47,7 +62,7 @@ public class EventSocketClient {
         }, "ws://localhost:8080/events");
 
         try {
-            Thread.currentThread().sleep(20000);
+            Thread.currentThread().sleep(60000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
