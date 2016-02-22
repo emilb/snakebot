@@ -18,7 +18,7 @@ base/base-install.sh
 echo "Generating passwords..."
 ./generate-passwords.sh
 
-source ~/passwords.sh
+source passwords.sh
 
 echo "Post install..."
 base/post-install.sh
