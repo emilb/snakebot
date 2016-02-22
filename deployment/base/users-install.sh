@@ -18,6 +18,7 @@ tokens=($users)
 for user in "${tokens[@]}"
 do
 	pwd=`printenv $user`
+	echo "$user has password: $pwd"
 	sudo adduser $user --gecos "$user,,," --disabled-password
 	echo $user:$pwd | chpasswd
 
