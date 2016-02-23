@@ -15,7 +15,7 @@ uid=`id -u admin`
 snake_defaults="/etc/default/snake"
 
 cat << EOF > $snake_defaults
-# Northpath system defaults
+# snake system defaults
 JENKINS_DATA_DIR="$docker_base_path/jenkins"
 SONAR_DATA_DIR="$docker_base_path/sonar"
 REGISTRY_DATA_DIR="$docker_base_path/registry"
@@ -25,6 +25,16 @@ INTERNAL_DOMAIN="$internal_domain"
 SUBDOMAINS="$subdomains"
 DOCKER_IP="$docker_ip"
 EOF
+
+# Create datadirs
+mkdir -p "$JENKINS_DATA_DIR"
+chmod 777 "$JENKINS_DATA_DIR"
+
+mkdir -p "$SONAR_DATA_DIR"
+chmod 777 "$SONAR_DATA_DIR"
+
+mkdir -p "$REGISTRY_DATA_DIR"
+chmod 777 "$REGISTRY_DATA_DIR"
 
 #log_config="--log-driver=gelf --log-opt gelf-address=udp://localhost:12201"
 log_config=""
