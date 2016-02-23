@@ -26,6 +26,8 @@ SUBDOMAINS="$subdomains"
 DOCKER_IP="$docker_ip"
 EOF
 
+source "$snake_defaults"
+
 # Create datadirs
 mkdir -p "$JENKINS_DATA_DIR"
 chmod 777 "$JENKINS_DATA_DIR"
