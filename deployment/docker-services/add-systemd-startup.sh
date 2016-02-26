@@ -19,6 +19,7 @@ cat << EOF > $snake_defaults
 JENKINS_DATA_DIR="$docker_base_path/jenkins"
 SONAR_DATA_DIR="$docker_base_path/sonar"
 REGISTRY_DATA_DIR="$docker_base_path/registry"
+POSTGRES_DATA_DIR="$docker_base_path/postgres"
 
 DOMAIN="$domain"
 INTERNAL_DOMAIN="$internal_domain"
@@ -170,12 +171,41 @@ ExecStart=/usr/bin/docker run \
 	$log_config \
 	-e VIRTUAL_PORT=9000 \
 	-e VIRTUAL_HOST=sonarqube.$domain,sonarqube.$internal_domain \
+	-e SONARQUBE_JDBC_URL=jdbc:postgresql://postgres:5432/sonar
 	-v \${SONAR_DATA_DIR}:/opt/sonarqube/data \
-	-p 9000:9000 -p 9092:9092 \
+	-p 9000:9000 \
 	--name sonarqube \
 	sonarqube
 
 ExecStop=/usr/bin/docker stop sonarqube
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+#**** postgres-docker.service ****
+cat << EOF > /etc/systemd/system/postgres-docker.service
+[Unit]
+Description=postgres container
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+EnvironmentFile=$snake_defaults
+
+ExecStartPre=-/usr/bin/docker kill postgres
+ExecStartPre=-/usr/bin/docker rm postgres
+
+ExecStart=/usr/bin/docker run \
+	$log_config \
+	-e POSTGRES_USER=sonar \
+    -e POSTGRES_PASSWORD=sonar \
+	-v \${POSTGRES_DATA_DIR}:/var/lib/postgresql/data \
+	--name sonarqube \
+	sonarqube
+
+ExecStop=/usr/bin/docker stop postgres
 
 [Install]
 WantedBy=multi-user.target
@@ -186,6 +216,7 @@ systemctl enable skydock-docker.service
 systemctl enable nginx-proxy-docker.service
 systemctl enable jenkins-docker.service
 systemctl enable sonarqube-docker.service
+systemctl enable postgres-docker.service
 
 systemctl daemon-reload
 
