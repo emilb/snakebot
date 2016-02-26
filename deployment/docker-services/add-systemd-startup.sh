@@ -29,8 +29,8 @@ EOF
 source "$snake_defaults"
 
 # Create datadirs
-#mkdir -p "$JENKINS_DATA_DIR"
-#chmod 777 "$JENKINS_DATA_DIR"
+mkdir -p "$JENKINS_DATA_DIR"
+chmod 777 "$JENKINS_DATA_DIR"
 
 mkdir -p "$SONAR_DATA_DIR"
 chmod 777 "$SONAR_DATA_DIR"
@@ -152,10 +152,40 @@ ExecStop=/usr/bin/docker stop jenkins
 WantedBy=multi-user.target
 EOF
 
+#**** sonarqube-docker.service ****
+cat << EOF > /etc/systemd/system/sonarqube-docker.service
+[Unit]
+Description=sonarqube container
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+EnvironmentFile=$snake_defaults
+
+ExecStartPre=-/usr/bin/docker kill sonarqube
+ExecStartPre=-/usr/bin/docker rm sonarqube
+
+ExecStart=/usr/bin/docker run \
+	$log_config \
+	-e VIRTUAL_PORT=9000 \
+	-e VIRTUAL_HOST=sonarqube.$domain,sonarqube.$internal_domain \
+	-v \${SONAR_DATA_DIR}:/opt/sonarqube/data \
+	-p 9000:9000 -p 9092:9092
+	--name sonarqube \
+	sonarqube
+
+ExecStop=/usr/bin/docker stop sonarqube
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 systemctl enable skydns-docker.service
 systemctl enable skydock-docker.service
 systemctl enable nginx-proxy-docker.service
 systemctl enable jenkins-docker.service
+systemctl enable sonarqube-docker.service
 
 systemctl daemon-reload
 

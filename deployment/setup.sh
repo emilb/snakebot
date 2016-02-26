@@ -38,13 +38,15 @@ docker-services/pull-services.sh
 echo "Adding systemd for docker containers..."
 docker-services/add-systemd-startup.sh
 
-echo "Generating SSL keys..."
+#echo "Generating SSL keys..."
 #docker-services/generate-ssl-keys.sh
 
 echo ""
 echo "All is done, rember to keep generated passwords safe!"
 cat ~/passwords.sh | sed s/'export '//g
 
+echo ""
+echo "Now reboot the machine, docker should start all services as defined"
 #
 # Problems with apt-get update then run:
 #
