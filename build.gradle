@@ -31,17 +31,17 @@ subprojects {
     sonarRunner {
         sonarProperties {
             property "sonar.host.url", "http://sonarqube.docker.snake.cygni.se:9000"
-            property "sonar.jdbc.url", "jdbc:postgresql://postgres.docker.snake.cygni.se:5432/sonar"
-            property "sonar.jdbc.driverClassName", "org.postgresql.Driver"
-            property "sonar.jdbc.username", "sonar"
-            property "sonar.jdbc.password", "sonar"
-            property "sonar.jacoco.reportPath", "build/jacoco/test.exec"
+//            property "sonar.jdbc.url", "jdbc:postgresql://postgres.docker.snake.cygni.se:5432/sonar"
+//            property "sonar.jdbc.driverClassName", "org.postgresql.Driver"
+//            property "sonar.jdbc.username", "sonar"
+//            property "sonar.jdbc.password", "sonar"
+//            property "sonar.jacoco.reportPath", "build/jacoco/test.exec"
             property "sonar.java.source property", "1.8"
         }
     }
-    jacoco {
-        reportsDir = file("build/tmp/jacoco.exec")
-    }
+//    jacoco {
+//        reportsDir = file("build/tmp/jacoco.exec")
+//    }
 }
 
 allprojects {
