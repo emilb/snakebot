@@ -44,6 +44,7 @@ docker-services/add-systemd-startup.sh
 echo ""
 echo "All is done, rember to keep generated passwords safe!"
 cat ~/passwords.sh | sed s/'export '//g
+rm ~/passwords.sh
 
 echo ""
 echo "Now reboot the machine, docker should start all services as defined"

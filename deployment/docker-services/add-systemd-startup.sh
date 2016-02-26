@@ -171,7 +171,7 @@ ExecStart=/usr/bin/docker run \
 	-e VIRTUAL_PORT=9000 \
 	-e VIRTUAL_HOST=sonarqube.$domain,sonarqube.$internal_domain \
 	-v \${SONAR_DATA_DIR}:/opt/sonarqube/data \
-	-p 9000:9000 -p 9092:9092
+	-p 9000:9000 -p 9092:9092 \
 	--name sonarqube \
 	sonarqube
 
