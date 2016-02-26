@@ -171,7 +171,7 @@ ExecStart=/usr/bin/docker run \
 	$log_config \
 	-e VIRTUAL_PORT=9000 \
 	-e VIRTUAL_HOST=sonarqube.$domain,sonarqube.$internal_domain \
-	-e SONARQUBE_JDBC_URL=jdbc:postgresql://postgres:5432/sonar
+	-e SONARQUBE_JDBC_URL=jdbc:postgresql://postgres:5432/sonar \
 	-v \${SONAR_DATA_DIR}:/opt/sonarqube/data \
 	-p 9000:9000 \
 	--name sonarqube \
