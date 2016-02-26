@@ -35,8 +35,15 @@ subprojects {
 //            property "sonar.jdbc.driverClassName", "org.postgresql.Driver"
 //            property "sonar.jdbc.username", "sonar"
 //            property "sonar.jdbc.password", "sonar"
-//            property "sonar.jacoco.reportPath", "build/jacoco/test.exec"
+            property "sonar.jacoco.reportPath", "build/jacoco/jacocoTest.exec"
             property "sonar.java.source property", "1.8"
+        }
+    }
+    test {
+        jacoco {
+            append = false
+            destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+            classDumpFile = file("$buildDir/jacoco/classpathdumps")
         }
     }
 //    jacoco {
