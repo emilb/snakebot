@@ -29,7 +29,7 @@ subprojects {
 
     sonarRunner {
         sonarProperties {
-            property "sonar.host.url", "http://sonarqube.snake.cygni.se"
+            property "sonar.host.url", "http://sonarqube.docker.snake.cygni.se"
             property "sonar.jdbc.url", "jdbc:postgresql://postgres.docker.snake.cygni.se:5432/sonar"
             property "sonar.jdbc.driverClassName", "org.postgresql.Driver"
             property "sonar.jdbc.username", "sonar"
