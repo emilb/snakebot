@@ -12,6 +12,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'idea'
     apply plugin: "sonar-runner"
+    apply plugin: 'jacoco'
 
     compileJava {
         sourceCompatibility = 1.8
