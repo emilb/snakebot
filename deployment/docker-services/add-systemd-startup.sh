@@ -29,8 +29,8 @@ EOF
 source "$snake_defaults"
 
 # Create datadirs
-mkdir -p "$JENKINS_DATA_DIR"
-chmod 777 "$JENKINS_DATA_DIR"
+#mkdir -p "$JENKINS_DATA_DIR"
+#chmod 777 "$JENKINS_DATA_DIR"
 
 mkdir -p "$SONAR_DATA_DIR"
 chmod 777 "$SONAR_DATA_DIR"

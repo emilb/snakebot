@@ -13,6 +13,7 @@ public class SnakeDeadEventTest {
         TestUtil.populateBaseData(sde, "rPlayerId");
 
         String serialized = GameMessageParser.encodeMessage(sde);
+
         SnakeDeadEvent parsedSde = (SnakeDeadEvent)GameMessageParser.decodeMessage(serialized);
 
         assertEquals(DeathReason.CollisionWithWall, parsedSde.getDeathReason());
