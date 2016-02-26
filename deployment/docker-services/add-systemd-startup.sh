@@ -172,7 +172,7 @@ ExecStart=/usr/bin/docker run \
 	-e VIRTUAL_HOST=sonarqube.$domain,sonarqube.$internal_domain \
 	-e SONARQUBE_JDBC_USERNAME=sonar \
     -e SONARQUBE_JDBC_PASSWORD=sonar \
-    -e SONARQUBE_JDBC_URL=jdbc:postgresql://postgres.docker.snake.cygni.se  :5432/sonar \
+    -e SONARQUBE_JDBC_URL=jdbc:postgresql://postgres.docker.snake.cygni.se:5432/sonar \
 	-v \${SONAR_DATA_DIR}:/opt/sonarqube/data \
 	-p 9000:9000 \
 	--name sonarqube \

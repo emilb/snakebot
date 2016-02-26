@@ -11,6 +11,7 @@ subprojects {
 
     apply plugin: 'java'
     apply plugin: 'idea'
+    apply plugin: "sonar-runner"
 
     compileJava {
         sourceCompatibility = 1.8
@@ -25,6 +26,16 @@ subprojects {
         testCompile "junit:junit:4.12"
         testCompile 'org.hamcrest:hamcrest-library:1.3'
     }
+
+    sonarRunner {
+        sonarProperties {
+            property "sonar.host.url", "http://sonarqube.snake.cygni.se"
+            property "sonar.jdbc.url", "jdbc:postgresql://postgres.docker.snake.cygni.se:5432/sonar"
+            property "sonar.jdbc.driverClassName", "org.postgresql.Driver"
+            property "sonar.jdbc.username", "sonar"
+            property "sonar.jdbc.password", "sonar"
+        }
+    }
 }
 
 allprojects {
@@ -33,7 +44,11 @@ allprojects {
             options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
         }
     }
+
+
 }
+
+
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.11'

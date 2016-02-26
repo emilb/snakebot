@@ -10,6 +10,16 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+
+UBUNTU_VERSION=`lsb_release -s -r`
+echo "Ubuntu ver: $UBUNTU_VERSION"
+
+if [ $UBUNTU_VERSION = '15.10' ]; then
+    echo "This setup is not known to work with any other version of Ubuntu 15.10!"
+    echo "You may try with another version by changing this script."
+    exit -1
+fi
+
 source config.sh
 
 echo "Base install..."
