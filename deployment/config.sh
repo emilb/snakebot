@@ -1,4 +1,5 @@
 
+export snake_defaults="/etc/default/snake"
 export domain="snake.cygni.se"
 export internal_domain="internal.snake.cygni.se"
 export docker_ip="172.17.0.1"

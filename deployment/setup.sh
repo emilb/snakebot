@@ -38,6 +38,9 @@ docker-services/pull-services.sh
 echo "Adding systemd for docker containers..."
 docker-services/add-systemd-startup.sh
 
+echo "Adding Jenkings configuration..."
+docker-services/jenkins/configure-jenkins.sh
+
 #echo "Generating SSL keys..."
 #docker-services/generate-ssl-keys.sh
 

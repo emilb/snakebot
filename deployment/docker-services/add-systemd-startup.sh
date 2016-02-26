@@ -12,7 +12,6 @@ fi
 
 guid=`getent group fileshare | cut -d: -f3`
 uid=`id -u admin`
-snake_defaults="/etc/default/snake"
 
 cat << EOF > $snake_defaults
 # snake system defaults
@@ -63,7 +62,7 @@ ExecStart=/usr/bin/docker run \
 	--name skydns \
 	crosbymichael/skydns \
 	    -nameserver 8.8.8.8:53,8.8.4.4:53 \
-	    -domain \${DOMAIN}
+	    -domain $domain
 
 ExecStop=/usr/bin/docker stop skydns
 
@@ -173,7 +172,7 @@ ExecStart=/usr/bin/docker run \
 	-e VIRTUAL_HOST=sonarqube.$domain,sonarqube.$internal_domain \
 	-e SONARQUBE_JDBC_USERNAME=sonar \
     -e SONARQUBE_JDBC_PASSWORD=sonar \
-    -e SONARQUBE_JDBC_URL=jdbc:postgresql://postgres:5432/sonar \
+    -e SONARQUBE_JDBC_URL=jdbc:postgresql://postgres.docker.snake.cygni.se  :5432/sonar \
 	-v \${SONAR_DATA_DIR}:/opt/sonarqube/data \
 	-p 9000:9000 \
 	--name sonarqube \
