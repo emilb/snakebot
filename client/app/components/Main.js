@@ -4,7 +4,7 @@ import GameBoard from './GameBoard';
 class Main extends React.Component {
     render () {
         return (
-            <div className="main-container">
+            <div>
                        <GameBoard />
 
                 <div className="container">

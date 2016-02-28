@@ -43,7 +43,7 @@
 //}
 //
 //export default GameControls;
-import getGame from '../utils/helpers';
+//import getGame from '../utils/helpers';
 //
 //
 //class GameControls extends React.Component {

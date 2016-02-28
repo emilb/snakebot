@@ -10,14 +10,27 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.8.1",
+    "bufferutil": "^1.2.1",
+    "crypto": "0.0.3",
+    "express": "^4.13.4",
     "firebase": "^2.3.2",
+    "fs": "0.0.2",
     "history": "^1.17.0",
     "lodash": "^3.10.1",
+    "net": "^1.0.2",
     "re-base": "^1.5.0",
     "react": "^0.14.5",
+    "react-bootstrap": "^0.28.3",
     "react-dom": "^0.14.6",
     "react-router": "^1.0.3",
-    "reactfire": "^0.5.1"
+    "react-websocket": "^1.0.0",
+    "reactfire": "^0.5.1",
+    "socket.io": "^1.4.5",
+    "socket.io-client": "^1.4.5",
+    "sockjs": "^0.3.15",
+    "tls": "0.0.1",
+    "utf-8-validate": "^1.2.1",
+    "ws": "^1.0.1"
   },
   "devDependencies": {
     "babel-core": "^6.3.26",
