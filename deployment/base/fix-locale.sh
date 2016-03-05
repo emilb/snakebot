@@ -10,14 +10,14 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+defaultlang="en_US"
+defaultEncoding="UTF-8"
+
 currLCALL=`locale | grep LC_ALL | awk '{split($0,a,"="); print a[2]}'`
 echo $currLCALL
 if [[ $currLCALL -eq "$defaultlang.$defaultEncoding" ]]; then
    exit 0
 fi
-
-defaultlang="en_US"
-defaultEncoding="UTF-8"
 
 cat << EOF > /etc/default/locale
 LANG="$defaultlang"
