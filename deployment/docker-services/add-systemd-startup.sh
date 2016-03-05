@@ -19,6 +19,7 @@ JENKINS_DATA_DIR="$docker_base_path/jenkins"
 SONAR_DATA_DIR="$docker_base_path/sonar"
 REGISTRY_DATA_DIR="$docker_base_path/registry"
 POSTGRES_DATA_DIR="$docker_base_path/postgres"
+ARCHIVA_DATA_DIR="$docker_base_path/archiva"
 
 DOMAIN="$domain"
 INTERNAL_DOMAIN="$internal_domain"
@@ -174,7 +175,6 @@ ExecStart=/usr/bin/docker run \
     -e SONARQUBE_JDBC_PASSWORD=sonar \
     -e SONARQUBE_JDBC_URL=jdbc:postgresql://postgres.docker.snake.cygni.se:5432/sonar \
 	-v \${SONAR_DATA_DIR}:/opt/sonarqube/data \
-	-p 9000:9000 \
 	--name sonarqube \
 	sonarqube
 
@@ -212,12 +212,42 @@ ExecStop=/usr/bin/docker stop postgres
 WantedBy=multi-user.target
 EOF
 
+#**** archiva-docker.service ****
+cat << EOF > /etc/systemd/system/archiva-docker.service
+[Unit]
+Description=archiva container
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+EnvironmentFile=$snake_defaults
+
+ExecStartPre=-/usr/bin/docker kill archiva
+ExecStartPre=-/usr/bin/docker rm archiva
+
+ExecStart=/usr/bin/docker run \
+	$log_config \
+	-e VIRTUAL_PORT=8080 \
+	-e VIRTUAL_HOST=archiva.$domain,archiva.$internal_domain \
+	-v \${ARCHIVA_DATA_DIR}:/var/archiva \
+	-p 9000:9000 \
+	--name archiva \
+	ninjaben/archiva-docker
+
+ExecStop=/usr/bin/docker stop archiva
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 systemctl enable skydns-docker.service
 systemctl enable skydock-docker.service
 systemctl enable nginx-proxy-docker.service
 systemctl enable jenkins-docker.service
 systemctl enable sonarqube-docker.service
 systemctl enable postgres-docker.service
+systemctl enable archiva-docker.service
 
 systemctl daemon-reload
 

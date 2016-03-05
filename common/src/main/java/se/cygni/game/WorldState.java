@@ -128,7 +128,7 @@ public class WorldState {
         }
     }
 
-    public int[] listPositionsWithContentOf(Class clazz) {
+    public <T extends WorldObject> int[] listPositionsWithContentOf(Class<T> clazz) {
         return IntStream.range(0, getSize()).filter( position ->
             isTileContentOfType(position, clazz)).toArray();
     }

@@ -1,9 +1,17 @@
+apply plugin: 'com.github.ben-manes.versions'
+
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
-        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.1.6'
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.1.9'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.12.0'
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:1.2"
     }
 }
 
@@ -11,8 +19,8 @@ subprojects {
 
     apply plugin: 'java'
     apply plugin: 'idea'
-    apply plugin: "sonar-runner"
     apply plugin: 'jacoco'
+    apply plugin: 'org.sonarqube'
 
     compileJava {
         sourceCompatibility = 1.8
@@ -23,32 +31,37 @@ subprojects {
         mavenCentral()
     }
 
+    ext {
+        moduleVersion = '0.0.2-SNAPSHOT'
+        slf4jVersion = '1.7.18'
+        logbackVersion = '1.1.6'
+        jacksonVersion = '2.7.2'
+        springBootVersion = '1.3.3.RELEASE'
+        springVersion = '4.2.5.RELEASE'
+        commonsMathVersion = '3.6'
+        commonsLangVersion = '3.4'
+        commonsBeanutilsVersion = '1.9.2'
+        commonsCollectionsVersion = '3.2.2'
+        guavaVersion = '19.0'
+    }
+
     dependencies {
         testCompile "junit:junit:4.12"
         testCompile 'org.hamcrest:hamcrest-library:1.3'
     }
 
-    sonarRunner {
-        sonarProperties {
+    sonarqube {
+        properties {
             property "sonar.host.url", "http://sonarqube.docker.snake.cygni.se:9000"
-//            property "sonar.jdbc.url", "jdbc:postgresql://postgres.docker.snake.cygni.se:5432/sonar"
-//            property "sonar.jdbc.driverClassName", "org.postgresql.Driver"
-//            property "sonar.jdbc.username", "sonar"
-//            property "sonar.jdbc.password", "sonar"
-            property "sonar.jacoco.reportPath", "build/jacoco/jacocoTest.exec"
             property "sonar.java.source property", "1.8"
         }
     }
+
     test {
         jacoco {
             append = false
-            destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
-            classDumpFile = file("$buildDir/jacoco/classpathdumps")
         }
     }
-//    jacoco {
-//        reportsDir = file("build/tmp/jacoco.exec")
-//    }
 }
 
 allprojects {
@@ -60,8 +73,6 @@ allprojects {
 
 
 }
-
-
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.11'
