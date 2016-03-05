@@ -10,14 +10,22 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+currLCALL=`locale | grep LC_ALL | awk '{split($0,a,"="); print a[2]}'`
+echo $currLCALL
+if [[ $currLCALL -eq "$defaultlang.$defaultEncoding" ]]; then
+   exit 0
+fi
+
+defaultlang="en_US"
+defaultEncoding="UTF-8"
 
 cat << EOF > /etc/default/locale
-LANG="en_GB"
-LANGUAGE="en_GB.UTF-8"
-LC_ALL="en_GB.UTF-8"
+LANG="$defaultlang"
+LANGUAGE="$defaultlang.$defaultEncoding"
+LC_ALL="$defaultlang.$defaultEncoding"
 EOF
 
-locale-gen en_GB
+locale-gen $defaultlang
 dpkg-reconfigure locales
 
 echo "Log out and in to reload locales"
