@@ -14,7 +14,7 @@ fi
 UBUNTU_VERSION=`lsb_release -s -r`
 echo "Ubuntu ver: $UBUNTU_VERSION"
 
-if [ $UBUNTU_VERSION = '15.10' ]; then
+if [ $UBUNTU_VERSION != "15.10" ]; then
     echo "This setup is not known to work with any other version of Ubuntu 15.10!"
     echo "You may try with another version by changing this script."
     exit -1

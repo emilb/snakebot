@@ -111,6 +111,7 @@ EnvironmentFile=$snake_defaults
 
 ExecStartPre=-/usr/bin/docker kill nginx-proxy
 ExecStartPre=-/usr/bin/docker rm nginx-proxy
+ExecStartPre=-/bin/sleep 10
 
 ExecStart=/usr/bin/docker run \
 	$log_config \
@@ -138,8 +139,9 @@ EnvironmentFile=$snake_defaults
 
 ExecStartPre=-/usr/bin/docker kill jenkins
 ExecStartPre=-/usr/bin/docker rm jenkins
+ExecStartPre=-/bin/sleep 30
 
-ExecStart=/usr/bin/docker run \
+ExecStart=sleep 60 & /usr/bin/docker run \
 	$log_config \
 	-e VIRTUAL_PORT=8080 \
 	-e VIRTUAL_HOST=jenkins.$domain,jenkins.$internal_domain \
@@ -166,6 +168,7 @@ EnvironmentFile=$snake_defaults
 
 ExecStartPre=-/usr/bin/docker kill sonarqube
 ExecStartPre=-/usr/bin/docker rm sonarqube
+ExecStartPre=-/bin/sleep 45
 
 ExecStart=/usr/bin/docker run \
 	$log_config \
@@ -197,6 +200,7 @@ EnvironmentFile=$snake_defaults
 
 ExecStartPre=-/usr/bin/docker kill postgres
 ExecStartPre=-/usr/bin/docker rm postgres
+ExecStartPre=-/bin/sleep 30
 
 ExecStart=/usr/bin/docker run \
 	$log_config \
@@ -225,13 +229,13 @@ EnvironmentFile=$snake_defaults
 
 ExecStartPre=-/usr/bin/docker kill archiva
 ExecStartPre=-/usr/bin/docker rm archiva
+ExecStartPre=-/bin/sleep 30
 
 ExecStart=/usr/bin/docker run \
 	$log_config \
 	-e VIRTUAL_PORT=8080 \
 	-e VIRTUAL_HOST=archiva.$domain,archiva.$internal_domain \
 	-v \${ARCHIVA_DATA_DIR}:/var/archiva \
-	-p 9000:9000 \
 	--name archiva \
 	ninjaben/archiva-docker
 
