@@ -182,7 +182,7 @@ ExecStart=/usr/bin/docker run \
     -e SONARQUBE_JDBC_PASSWORD=sonar \
     -e SONARQUBE_JDBC_URL=jdbc:postgresql://postgres.docker.snake.cygni.se:5432/sonar \
 	-v \${SONAR_DATA_DIR}:/opt/sonarqube/data \
-	-v \${SONAR_EXTENSION_DIR}:/opt/sonarqube/data \
+	-v \${SONAR_EXTENSION_DIR}:/opt/sonarqube/extensions \
 	--name sonarqube \
 	sonarqube
 
