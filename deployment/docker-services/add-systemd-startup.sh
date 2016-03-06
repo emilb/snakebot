@@ -16,7 +16,8 @@ uid=`id -u admin`
 cat << EOF > $snake_defaults
 # snake system defaults
 JENKINS_DATA_DIR="$docker_base_path/jenkins"
-SONAR_DATA_DIR="$docker_base_path/sonar"
+SONAR_DATA_DIR="$docker_base_path/sonarqube/data"
+SONAR_EXTENSION_DIR="$docker_base_path/sonarqube/extensions"
 REGISTRY_DATA_DIR="$docker_base_path/registry"
 POSTGRES_DATA_DIR="$docker_base_path/postgres"
 ARCHIVA_DATA_DIR="$docker_base_path/archiva"
@@ -35,6 +36,9 @@ chmod 777 "$JENKINS_DATA_DIR"
 
 mkdir -p "$SONAR_DATA_DIR"
 chmod 777 "$SONAR_DATA_DIR"
+
+mkdir -p "$SONAR_EXTENSION_DIR"
+chmod 777 "$SONAR_EXTENSION_DIR"
 
 mkdir -p "$REGISTRY_DATA_DIR"
 chmod 777 "$REGISTRY_DATA_DIR"
@@ -141,7 +145,7 @@ ExecStartPre=-/usr/bin/docker kill jenkins
 ExecStartPre=-/usr/bin/docker rm jenkins
 ExecStartPre=-/bin/sleep 30
 
-ExecStart=sleep 60 & /usr/bin/docker run \
+ExecStart=/usr/bin/docker run \
 	$log_config \
 	-e VIRTUAL_PORT=8080 \
 	-e VIRTUAL_HOST=jenkins.$domain,jenkins.$internal_domain \
@@ -178,6 +182,7 @@ ExecStart=/usr/bin/docker run \
     -e SONARQUBE_JDBC_PASSWORD=sonar \
     -e SONARQUBE_JDBC_URL=jdbc:postgresql://postgres.docker.snake.cygni.se:5432/sonar \
 	-v \${SONAR_DATA_DIR}:/opt/sonarqube/data \
+	-v \${SONAR_EXTENSION_DIR}:/opt/sonarqube/data \
 	--name sonarqube \
 	sonarqube
 
