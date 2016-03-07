@@ -20,7 +20,7 @@ SONAR_DATA_DIR="$docker_base_path/sonarqube/data"
 SONAR_EXTENSION_DIR="$docker_base_path/sonarqube/extensions"
 REGISTRY_DATA_DIR="$docker_base_path/registry"
 POSTGRES_DATA_DIR="$docker_base_path/postgres"
-ARCHIVA_DATA_DIR="$docker_base_path/archiva"
+MAVEN_REPO_DATA_DIR="$docker_base_path/maven_repo"
 
 DOMAIN="$domain"
 INTERNAL_DOMAIN="$internal_domain"
@@ -42,6 +42,9 @@ chmod 777 "$SONAR_EXTENSION_DIR"
 
 mkdir -p "$REGISTRY_DATA_DIR"
 chmod 777 "$REGISTRY_DATA_DIR"
+
+mkdir -p "$MAVEN_REPO_DATA_DIR"
+chmod 777 "$MAVEN_REPO_DATA_DIR"
 
 #log_config="--log-driver=gelf --log-opt gelf-address=udp://localhost:12201"
 log_config=""
@@ -150,6 +153,7 @@ ExecStart=/usr/bin/docker run \
 	-e VIRTUAL_PORT=8080 \
 	-e VIRTUAL_HOST=jenkins.$domain,jenkins.$internal_domain \
 	-v \${JENKINS_DATA_DIR}:/var/jenkins_home \
+	-v \${MAVEN_REPO_DATA_DIR}:/var/mavenrepo \
 	--name jenkins \
 	jenkins
 
@@ -221,10 +225,10 @@ ExecStop=/usr/bin/docker stop postgres
 WantedBy=multi-user.target
 EOF
 
-#**** archiva-docker.service ****
-cat << EOF > /etc/systemd/system/archiva-docker.service
+#**** mavenrepo-docker.service ****
+cat << EOF > /etc/systemd/system/mavenrepo-docker.service
 [Unit]
-Description=archiva container
+Description=maven repo container
 Requires=docker.service
 After=docker.service
 
@@ -232,19 +236,19 @@ After=docker.service
 Restart=always
 EnvironmentFile=$snake_defaults
 
-ExecStartPre=-/usr/bin/docker kill archiva
-ExecStartPre=-/usr/bin/docker rm archiva
+ExecStartPre=-/usr/bin/docker kill mavenrepo
+ExecStartPre=-/usr/bin/docker rm mavenrepo
 ExecStartPre=-/bin/sleep 30
 
 ExecStart=/usr/bin/docker run \
 	$log_config \
-	-e VIRTUAL_PORT=8080 \
-	-e VIRTUAL_HOST=archiva.$domain,archiva.$internal_domain \
-	-v \${ARCHIVA_DATA_DIR}:/var/archiva \
-	--name archiva \
-	ninjaben/archiva-docker
+	-e VIRTUAL_PORT=80 \
+	-e VIRTUAL_HOST=mavenrepo.$domain,mavenrepo.$internal_domain \
+	-v \${MAVEN_REPO_DATA_DIR}:/usr/share/nginx/html:ro \
+	--name mavenrepo \
+	nginx
 
-ExecStop=/usr/bin/docker stop archiva
+ExecStop=/usr/bin/docker stop mavenrepo
 
 [Install]
 WantedBy=multi-user.target
@@ -256,7 +260,7 @@ systemctl enable nginx-proxy-docker.service
 systemctl enable jenkins-docker.service
 systemctl enable sonarqube-docker.service
 systemctl enable postgres-docker.service
-systemctl enable archiva-docker.service
+systemctl enable mavenrepo-docker.service
 
 systemctl daemon-reload
 

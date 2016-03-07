@@ -18,13 +18,3 @@ dependencies {
     compile("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
     compile("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
 }
-
-jar {
-    manifest {
-        attributes "Main-Class": "se.cygni.snake.SnakePlayer"
-    }
-
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}

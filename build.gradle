@@ -21,6 +21,7 @@ subprojects {
     apply plugin: 'idea'
     apply plugin: 'jacoco'
     apply plugin: 'org.sonarqube'
+    apply plugin: 'maven-publish'
 
     compileJava {
         sourceCompatibility = 1.8
@@ -43,6 +44,24 @@ subprojects {
         commonsBeanutilsVersion = '1.9.2'
         commonsCollectionsVersion = '3.2.2'
         guavaVersion = '19.0'
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                groupId 'se.cygni.snakebot'
+                version "$moduleVersion"
+                from components.java
+            }
+        }
+    }
+    publishing {
+        repositories {
+            maven {
+                // This is for jenkins local filesystem
+                url "/var/mavenrepo"
+            }
+        }
     }
 
     dependencies {

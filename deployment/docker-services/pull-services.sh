@@ -6,6 +6,6 @@ docker pull jwilder/nginx-proxy
 docker pull jenkins
 docker pull sonarqube
 docker pull postgres
-docker pull ninjaben/archiva-docker
+docker pull nginx
 
 
